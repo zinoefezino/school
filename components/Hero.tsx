@@ -20,8 +20,8 @@ export default function Hero() {
             Building confident learners for a changing world
           </h1>
           <p className="mt-5 max-w-md text-base leading-7 text-white/80 sm:text-lg">
-            Fairview Academy blends strong academics with hands-on learning,
-            guiding students from foundation years through to graduation.
+            School blends strong academics with hands-on learning, guiding
+            students from foundation years through to graduation.
           </p>
           <div className="mt-8 flex flex-wrap items-center gap-4">
             <a
