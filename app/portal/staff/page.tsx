@@ -16,14 +16,14 @@ export default function StaffPortalPage() {
   const [showPassword, setShowPassword] = useState(false);
 
   return (
-    <div className="flex min-h-screen bg-slate-50 px-6 py-10">
+    <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10">
       <div className="mx-auto w-full max-w-md">
         <Link
-          href="/portal/login"
+          href="/"
           className="mb-6 inline-flex items-center gap-2 text-sm font-medium text-slate-700"
         >
           <HugeiconsIcon icon={ArrowLeft01Icon} size={16} />
-          Back to portal access
+          Back to Home
         </Link>
 
         <div className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -59,7 +59,7 @@ export default function StaffPortalPage() {
                   id="staff-email"
                   type="email"
                   placeholder="name@fairviewacademy.com"
-                  className="w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                  className="w-full border-0 bg-transparent text-base text-slate-800 outline-none placeholder:text-slate-400"
                 />
               </div>
             </div>
@@ -86,7 +86,7 @@ export default function StaffPortalPage() {
                   id="staff-password"
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••"
-                  className="w-full border-0 bg-transparent text-sm text-slate-800 outline-none placeholder:text-slate-400"
+                  className="w-full border-0 bg-transparent text-base text-slate-800 outline-none placeholder:text-slate-400"
                 />
                 <button
                   type="button"

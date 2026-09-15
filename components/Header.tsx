@@ -100,30 +100,12 @@ export default function Header() {
 
         <button
           type="button"
-          className="relative flex h-10 w-10 items-center justify-center text-navy transition-transform duration-300 active:scale-95 lg:hidden"
+          className="relative flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 text-navy transition-colors duration-300 hover:border-blue hover:text-blue active:scale-95 lg:hidden"
           onClick={() => setOpen((value) => !value)}
           aria-label={open ? "Close menu" : "Open menu"}
           aria-expanded={open}
         >
-          <span
-            className={`absolute transition-all duration-300 ease-out ${
-              open
-                ? "rotate-90 scale-75 opacity-0"
-                : "rotate-0 scale-100 opacity-100"
-            }`}
-          >
-            <HugeiconsIcon icon={Menu01Icon} size={28} />
-          </span>
-
-          <span
-            className={`absolute transition-all duration-300 ease-out ${
-              open
-                ? "rotate-0 scale-100 opacity-100"
-                : "-rotate-90 scale-75 opacity-0"
-            }`}
-          >
-            <HugeiconsIcon icon={Cancel01Icon} size={26} />
-          </span>
+          <HugeiconsIcon icon={Menu01Icon} size={28} />
         </button>
       </div>
 
@@ -144,7 +126,7 @@ export default function Header() {
 
           <button
             type="button"
-            className="flex h-10 w-10 items-center justify-center text-slate-900 transition-transform duration-300 active:scale-95"
+            className="flex h-10 w-10 items-center justify-center rounded-lg border border-slate-300 text-slate-900 transition-colors duration-300 hover:border-blue hover:text-blue active:scale-95"
             onClick={() => setOpen(false)}
             aria-label="Close menu"
           >
