@@ -83,12 +83,12 @@ export default function Gallery() {
 
         <div
           ref={galleryRef}
-          className="mt-8 flex gap-4 overflow-x-auto pb-3 scrollbar-none [&::-webkit-scrollbar]:hidden sm:gap-5 lg:overflow-x-auto lg:pb-4"
+          className="mt-8 flex gap-4 overflow-x-auto pb-3 scrollbar-none [&::-webkit-scrollbar]:hidden sm:gap-5 lg:overflow-x-auto lg:pb-4 "
         >
           {photos.map((photo) => (
             <div
               key={photo.caption}
-              className="group relative h-[320px] min-w-[84%] overflow-hidden rounded-[1.5rem] bg-blue-light shadow-sm sm:min-w-[420px] lg:h-[420px] lg:min-w-[420px]"
+              className="group relative h-80 min-w-[84%] overflow-hidden rounded-3xl bg-blue-light shadow-sm sm:min-w-105 lg:h-105 lg:min-w-105"
             >
               <Image
                 src={photo.src}
