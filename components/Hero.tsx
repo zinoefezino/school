@@ -14,7 +14,7 @@ export default function Hero() {
             Fairview Academy
           </span> */}
 
-          <h1 className="mt-4 text-4xl font-medium leading-tight text-blue sm:text-5xl lg:text-6xl">
+          <h1 className="mt-4 text-4xl font-bold leading-tight text-blue sm:text-5xl lg:text-6xl">
             FAIRVIEW GROUP OF SCHOOLS
           </h1>
 

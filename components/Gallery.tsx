@@ -53,7 +53,7 @@ export default function Gallery() {
       <div className="mx-auto max-w-6xl px-0 py-20 lg:py-28">
         <div className="px-4 sm:px-6">
           <div className="max-w-xl">
-            <h2 className="text-3xl font-medium leading-tight text-foreground">
+            <h2 className="text-3xl font-bold leading-tight text-foreground">
               Photos of our school activities and events
             </h2>
             <p className="mt-4 text-base leading-7 text-foreground/70">

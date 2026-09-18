@@ -39,7 +39,7 @@ export default function WhyUs() {
       <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
         <div className="grid gap-12 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] lg:gap-20">
           <div>
-            <h2 className="text-3xl font-medium leading-tight text-foreground">
+            <h2 className="text-3xl font-bold leading-tight text-foreground">
               Why families choose School
             </h2>
             <p className="mt-4 max-w-sm text-base leading-7 text-foreground/70">

@@ -39,7 +39,7 @@ export default function Academics() {
     <section className="">
       <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
         <div className="max-w-xl">
-          <h2 className="text-3xl font-medium leading-tight text-foreground">
+          <h2 className="text-3xl font-bold leading-tight text-foreground">
             Academic programs for every age
           </h2>
           <p className="mt-4 text-base leading-7 text-foreground/70">
