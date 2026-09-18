@@ -1,6 +1,6 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Megaphone01Icon } from "@hugeicons/core-free-icons";
-import { announcementsFor } from "../../../../lib/announcements";
+import { announcementsFor, audienceLabel } from "../../../../lib/announcements";
 
 const announcements = announcementsFor("STAFF");
 
@@ -38,7 +38,7 @@ export default function StaffAnnouncementsPage() {
                   {item.body}
                 </p>
                 <span className="mt-3 inline-block rounded-full bg-blue-light px-2.5 py-1 text-xs font-medium text-navy">
-                  {item.audience}
+                  {audienceLabel(item.audiences)}
                 </span>
               </div>
             </div>

@@ -9,7 +9,7 @@ import {
   ViewIcon,
   ViewOffIcon,
 } from "@hugeicons/core-free-icons";
-import type { UserRole } from "../../models/User";
+import type { UserRole } from "../../../models/User";
 
 const redirects: Record<UserRole, string> = {
   ADMIN: "/dashboard/admin",
