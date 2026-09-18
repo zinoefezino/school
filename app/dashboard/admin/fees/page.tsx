@@ -1,89 +1,78 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Coins01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 
-const feeSummary = [
-  { label: "Collected", value: "₦42.6M" },
-  { label: "Pending", value: "₦6.1M" },
-  { label: "Overdue", value: "₦1.8M" },
-];
-
-const invoices = [
-  {
-    student: "Chidera Okafor",
-    classSection: "JSS1 Gold",
-    amount: "₦85,000",
-    dueDate: "Oct 15, 2026",
-    status: "Paid",
-  },
-  {
-    student: "Tamuno Briggs",
-    classSection: "SS2 Diamond",
-    amount: "₦120,000",
-    dueDate: "Oct 15, 2026",
-    status: "Pending",
-  },
-  {
-    student: "Amara Chukwu",
-    classSection: "Primary 4A",
-    amount: "₦65,000",
-    dueDate: "Sep 30, 2026",
-    status: "Overdue",
-  },
-  {
-    student: "David Effiong",
-    classSection: "SS3 Emerald",
-    amount: "₦120,000",
-    dueDate: "Oct 15, 2026",
-    status: "Paid",
-  },
-];
-
-const statusStyles: Record<string, string> = {
-  Paid: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
-  Pending: "bg-blue-light text-blue",
-  Overdue: "bg-[#B4483B]/10 text-[#B4483B]",
+type Invoice = {
+  _id: string;
+  amount: number;
+  dueDate: string;
+  status: string;
+  student?: { fullName?: string };
+  classSection?: { name?: string; classLevel?: { name?: string } };
 };
-
 export default function FeesPage() {
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
+  const [summary, setSummary] = useState<{ _id: string; total: number }[]>([]);
+  const [total, setTotal] = useState(0);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    fetch("/api/admin/fees")
+      .then((response) => response.json())
+      .then((data) => {
+        setInvoices(data.invoices ?? []);
+        setSummary(data.summary ?? []);
+        setTotal(data.total ?? 0);
+      })
+      .finally(() => setLoading(false));
+  }, []);
+  const totalFor = (status: string) =>
+    summary.find((item) => item._id === status)?.total ?? 0;
+  const statusStyles: Record<string, string> = {
+    PAID: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
+    PENDING: "bg-blue-light text-blue",
+    OVERDUE: "bg-[#B4483B]/10 text-[#B4483B]",
+  };
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
-        {feeSummary.map((item) => (
+        {[
+          ["Collected", "PAID"],
+          ["Pending", "PENDING"],
+          ["Overdue", "OVERDUE"],
+        ].map(([label, status]) => (
           <div
-            key={item.label}
+            key={status}
             className="rounded-2xl border border-navy/10 bg-white p-5"
           >
             <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light text-blue">
               <HugeiconsIcon icon={Coins01Icon} size={20} />
             </span>
             <p className="mt-4 text-2xl font-medium text-foreground">
-              {item.value}
+              ₦{totalFor(status).toLocaleString()}
             </p>
-            <p className="mt-1 text-sm text-foreground/60">
-              {item.label} (this term)
-            </p>
+            <p className="mt-1 text-sm text-foreground/60">{label}</p>
           </div>
         ))}
       </div>
-
       <div className="flex flex-wrap items-center justify-between gap-4">
         <p className="text-sm text-foreground/60">
-          {invoices.length} invoices this term
+          {total.toLocaleString()} invoices
         </p>
         <div className="flex gap-2">
           <a
             href="/dashboard/admin/fees/schedule"
-            className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-blue-light"
+            className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy hover:bg-blue-light"
           >
             Fee schedules
           </a>
-          <button className="flex items-center gap-2 rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-blue-light">
+          <button className="flex items-center gap-2 rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy hover:bg-blue-light">
             <HugeiconsIcon icon={Download01Icon} size={18} />
             Export
           </button>
         </div>
       </div>
-
       <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
         <table className="w-full text-left">
           <thead>
@@ -96,29 +85,50 @@ export default function FeesPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {invoices.map((invoice) => (
-              <tr key={invoice.student} className="text-sm">
-                <td className="whitespace-nowrap px-6 py-3.5 font-medium text-foreground">
-                  {invoice.student}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {invoice.classSection}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {invoice.amount}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {invoice.dueDate}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status]}`}
-                  >
-                    {invoice.status}
-                  </span>
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  Loading invoices...
                 </td>
               </tr>
-            ))}
+            ) : invoices.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={5}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  No invoices found.
+                </td>
+              </tr>
+            ) : (
+              invoices.map((invoice) => (
+                <tr key={invoice._id} className="text-sm">
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    {invoice.student?.fullName ?? "Unknown student"}
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    {invoice.classSection?.classLevel?.name}{" "}
+                    {invoice.classSection?.name}
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    ₦{invoice.amount.toLocaleString()}
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    {new Date(invoice.dueDate).toLocaleDateString()}
+                  </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[invoice.status] ?? "bg-blue-light text-blue"}`}
+                    >
+                      {invoice.status}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

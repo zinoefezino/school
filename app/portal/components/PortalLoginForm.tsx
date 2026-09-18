@@ -93,7 +93,7 @@ export default function PortalLoginForm({
           >
             Password
           </label>
-          <a href="#" className="text-sm text-blue">
+          <a href="/portal/forgot-password" className="text-sm text-blue">
             Forgot password?
           </a>
         </div>

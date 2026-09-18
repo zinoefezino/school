@@ -53,7 +53,7 @@ export default function PortalLoginPage() {
             </span>
             <div>
               <p className="text-xs font-medium uppercase tracking-wide text-blue">
-                Fairview Academy
+                School
               </p>
               <h1 className="mt-1 text-2xl font-medium text-slate-900">
                 Choose your portal

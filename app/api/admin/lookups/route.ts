@@ -4,6 +4,7 @@ import { getSession } from "../../../../lib/session";
 import Student from "../../../../models/Student";
 import ClassSection from "../../../../models/ClassSection";
 import Term from "../../../../models/Term";
+import Staff from "../../../../models/Staff";
 
 export async function GET() {
   const session = await getSession();
@@ -13,7 +14,7 @@ export async function GET() {
       { status: 401 },
     );
   await connectDB();
-  const [students, classes, terms] = await Promise.all([
+  const [students, classes, terms, staff] = await Promise.all([
     Student.find()
       .select("_id fullName admissionNumber")
       .sort({ fullName: 1 })
@@ -28,6 +29,7 @@ export async function GET() {
       .populate("session", "name")
       .sort({ _id: -1 })
       .lean(),
+    Staff.find().select("_id fullName").sort({ fullName: 1 }).lean(),
   ]);
-  return NextResponse.json({ students, classes, terms });
+  return NextResponse.json({ students, classes, terms, staff });
 }

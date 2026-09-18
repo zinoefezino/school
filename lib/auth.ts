@@ -1,5 +1,6 @@
 import {
   createHmac,
+  createHash,
   randomBytes,
   scrypt as nodeScrypt,
   timingSafeEqual,
@@ -8,6 +9,7 @@ import { promisify } from "util";
 
 const scrypt = promisify(nodeScrypt);
 export const sessionCookieName = "school_session";
+export const resetTokenLifetimeMs = 30 * 60 * 1000;
 const sessionLifetimeSeconds = 60 * 60 * 8;
 
 type SessionPayload = {
@@ -29,6 +31,10 @@ function encode(value: string) {
 
 function decode(value: string) {
   return Buffer.from(value, "base64url").toString("utf8");
+}
+
+export function hashResetToken(token: string) {
+  return createHash("sha256").update(token).digest("hex");
 }
 
 export async function hashPassword(password: string) {

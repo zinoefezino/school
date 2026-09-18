@@ -1,18 +1,25 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft02Icon, CalendarCheckIcon } from "@hugeicons/core-free-icons";
 
-const records = [
-  { name: "Chidera Okafor", classSection: "JSS1 Gold", present: 18, total: 19 },
-  {
-    name: "Tamuno Briggs",
-    classSection: "SS2 Diamond",
-    present: 17,
-    total: 19,
-  },
-  { name: "Amara Chukwu", classSection: "Primary 4A", present: 16, total: 18 },
-];
-
+type RecordRow = {
+  student?: { fullName?: string; admissionNumber?: string };
+  present: number;
+  total: number;
+};
 export default function AttendanceDetailsPage() {
+  const [month, setMonth] = useState(new Date().toISOString().slice(0, 7));
+  const [records, setRecords] = useState<RecordRow[]>([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    setLoading(true);
+    fetch(`/api/admin/attendance/details?month=${month}`)
+      .then((response) => response.json())
+      .then((data) => setRecords(data.records ?? []))
+      .finally(() => setLoading(false));
+  }, [month]);
   return (
     <div className="flex flex-col gap-6">
       <a
@@ -31,52 +38,70 @@ export default function AttendanceDetailsPage() {
             Attendance details
           </h2>
         </div>
-        <div className="flex gap-3">
-          <select className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm">
-            <option>All classes</option>
-            <option>JSS1 Gold</option>
-          </select>
-          <input
-            type="month"
-            defaultValue="2026-09"
-            className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm"
-          />
-        </div>
+        <input
+          type="month"
+          value={month}
+          onChange={(event) => setMonth(event.target.value)}
+          className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-base"
+        />
       </div>
       <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
         <table className="w-full text-left">
           <thead>
             <tr className="border-b border-navy/10 text-xs font-medium uppercase tracking-wide text-foreground/50">
               <th className="px-6 py-3.5">Student</th>
-              <th className="px-6 py-3.5">Class</th>
+              <th className="px-6 py-3.5">Admission no.</th>
               <th className="px-6 py-3.5">Present days</th>
               <th className="px-6 py-3.5">Rate</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {records.map((record) => (
-              <tr key={record.name} className="text-sm">
-                <td className="px-6 py-4 font-medium text-foreground">
-                  <span className="flex items-center gap-2">
-                    <HugeiconsIcon
-                      icon={CalendarCheckIcon}
-                      size={17}
-                      className="text-blue"
-                    />
-                    {record.name}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-foreground/70">
-                  {record.classSection}
-                </td>
-                <td className="px-6 py-4 text-foreground/70">
-                  {record.present} / {record.total}
-                </td>
-                <td className="px-6 py-4 font-medium text-foreground">
-                  {Math.round((record.present / record.total) * 100)}%
+            {loading ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  Loading attendance...
                 </td>
               </tr>
-            ))}
+            ) : records.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={4}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  No attendance records for this month.
+                </td>
+              </tr>
+            ) : (
+              records.map((record) => (
+                <tr key={record.student?.admissionNumber} className="text-sm">
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    <span className="flex items-center gap-2">
+                      <HugeiconsIcon
+                        icon={CalendarCheckIcon}
+                        size={17}
+                        className="text-blue"
+                      />
+                      {record.student?.fullName ?? "Unknown student"}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    {record.student?.admissionNumber ?? "-"}
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    {record.present} / {record.total}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    {record.total
+                      ? Math.round((record.present / record.total) * 100)
+                      : 0}
+                    %
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>
