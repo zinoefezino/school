@@ -3,6 +3,7 @@ import { Schema, models, model, Document, Types } from "mongoose";
 export interface IClassSection extends Document {
   name: string; // e.g. "Gold", "A"
   classLevel: Types.ObjectId;
+  classTeacher?: Types.ObjectId;
 }
 
 const classSectionSchema = new Schema<IClassSection>({
@@ -12,6 +13,7 @@ const classSectionSchema = new Schema<IClassSection>({
     ref: "ClassLevel",
     required: true,
   },
+  classTeacher: { type: Schema.Types.ObjectId, ref: "Staff" },
 });
 
 classSectionSchema.index({ classLevel: 1, name: 1 }, { unique: true });

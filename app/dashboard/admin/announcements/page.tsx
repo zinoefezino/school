@@ -1,38 +1,40 @@
+"use client";
+
+import { useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, Megaphone01Icon } from "@hugeicons/core-free-icons";
+import {
+  announcements,
+  audienceLabel,
+  type AnnouncementAudience,
+} from "../../../../lib/announcements";
 
-const announcements = [
-  {
-    title: "Mid-term break notice",
-    audience: "All",
-    date: "Sep 15, 2026",
-    excerpt:
-      "School will be closed from Oct 3 to Oct 10 for mid-term break. Classes resume Oct 13.",
-  },
-  {
-    title: "PTA meeting — Term 1",
-    audience: "Parents",
-    date: "Sep 10, 2026",
-    excerpt:
-      "The first PTA meeting of the term will be held in the main hall at 10am on Saturday.",
-  },
-  {
-    title: "Inter-house sports day",
-    audience: "Students, Staff",
-    date: "Sep 2, 2026",
-    excerpt:
-      "This year's inter-house sports competition takes place on the school field. All houses to report by 8am.",
-  },
-];
+type Filter = "ALL" | AnnouncementAudience;
 
-export default function AnnouncementsPage() {
+export default function AdminAnnouncementsPage() {
+  const [filter, setFilter] = useState<Filter>("ALL");
+  const visibleAnnouncements = announcements.filter(
+    (announcement) =>
+      filter === "ALL" || announcement.audiences.includes(filter),
+  );
+  const filters: [Filter, string][] = [
+    ["ALL", "All announcements"],
+    ["STUDENT", "Students"],
+    ["PARENT", "Parents"],
+    ["STAFF", "Staff"],
+  ];
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
-        <p className="text-sm text-foreground/60">
-          {announcements.length} announcements
-        </p>
-
+        <div>
+          <p className="text-sm text-foreground/60">
+            {visibleAnnouncements.length} announcements shown
+          </p>
+          <h2 className="mt-1 text-xl font-medium text-foreground">
+            Announcements
+          </h2>
+        </div>
         <a
           href="/dashboard/admin/announcements/new"
           className="flex items-center gap-2 rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
@@ -41,10 +43,20 @@ export default function AnnouncementsPage() {
           New announcement
         </a>
       </div>
-
+      <div className="flex flex-wrap gap-2">
+        {filters.map(([value, label]) => (
+          <button
+            key={value}
+            onClick={() => setFilter(value)}
+            className={`rounded-full px-4 py-2 text-sm font-medium transition-colors ${filter === value ? "bg-navy text-white" : "bg-white text-foreground/60 hover:bg-blue-light"}`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
       <div className="flex flex-col gap-4">
-        {announcements.map((item) => (
-          <div
+        {visibleAnnouncements.map((item) => (
+          <article
             key={item.title}
             className="rounded-2xl border border-navy/10 bg-white p-6"
           >
@@ -62,14 +74,14 @@ export default function AnnouncementsPage() {
                   </span>
                 </div>
                 <p className="mt-1.5 text-sm leading-6 text-foreground/70">
-                  {item.excerpt}
+                  {item.body}
                 </p>
                 <span className="mt-3 inline-block rounded-full bg-blue-light px-2.5 py-1 text-xs font-medium text-navy">
-                  {item.audience}
+                  {audienceLabel(item.audiences)}
                 </span>
               </div>
             </div>
-          </div>
+          </article>
         ))}
       </div>
     </div>

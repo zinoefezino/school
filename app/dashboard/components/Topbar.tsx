@@ -2,12 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Menu01Icon, Search01Icon, BellIcon } from "@hugeicons/core-free-icons";
+import { Menu01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 
 const titles: Record<string, string> = {
   "/dashboard/admin": "Overview",
   "/dashboard/admin/students": "Students",
   "/dashboard/admin/staff": "Staff",
+  "/dashboard/admin/parents/new": "Add parent",
   "/dashboard/admin/classes": "Classes",
   "/dashboard/admin/attendance": "Attendance",
   "/dashboard/admin/fees": "Fees",
@@ -49,14 +50,6 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
             className="w-40 text-sm text-foreground outline-none placeholder:text-foreground/40"
           />
         </div>
-
-        <button
-          aria-label="Notifications"
-          className="relative text-foreground/60 hover:text-foreground"
-        >
-          <HugeiconsIcon icon={BellIcon} size={22} />
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-blue" />
-        </button>
 
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-sm font-medium text-navy">

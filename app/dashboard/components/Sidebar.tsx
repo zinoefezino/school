@@ -8,6 +8,7 @@ import {
   DashboardSquare01Icon,
   StudentsIcon,
   TeacherIcon,
+  LocationUser01Icon,
   Book02Icon,
   Calendar03Icon,
   Coins01Icon,
@@ -16,11 +17,20 @@ import {
   Logout01Icon,
   Cancel01Icon,
 } from "@hugeicons/core-free-icons";
+import {
+  announcementReadStorageKey,
+  unreadAnnouncementsCount,
+} from "../../../lib/announcements";
 
 const navItems = [
   { label: "Overview", href: "/dashboard/admin", icon: DashboardSquare01Icon },
   { label: "Students", href: "/dashboard/admin/students", icon: StudentsIcon },
   { label: "Staff", href: "/dashboard/admin/staff", icon: TeacherIcon },
+  {
+    label: "Parents",
+    href: "/dashboard/admin/parents/new",
+    icon: LocationUser01Icon,
+  },
   { label: "Classes", href: "/dashboard/admin/classes", icon: Book02Icon },
   {
     label: "Attendance",
@@ -42,6 +52,20 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/portal/login";
+  };
+  const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
+
+  useEffect(() => {
+    const hasReadAnnouncements =
+      window.localStorage.getItem(announcementReadStorageKey("ADMIN")) ===
+      "true";
+    setUnreadAnnouncements(
+      hasReadAnnouncements ? 0 : unreadAnnouncementsCount(),
+    );
+  }, [pathname]);
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
   const [indicator, setIndicator] = useState({
@@ -151,7 +175,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                   itemRefs.current[index] = element;
                 }}
                 href={item.href}
-                onClick={closeOnMobile}
+                onClick={() => {
+                  if (item.label === "Announcements") {
+                    window.localStorage.setItem(
+                      announcementReadStorageKey("ADMIN"),
+                      "true",
+                    );
+                    setUnreadAnnouncements(0);
+                  }
+                  closeOnMobile();
+                }}
                 className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 lg:hover:bg-transparent ${
                   isActive
                     ? "text-white/60 lg:font-semibold lg:text-navy"
@@ -160,6 +193,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               >
                 <HugeiconsIcon icon={item.icon} size={20} />
                 <span>{item.label}</span>
+                {item.label === "Announcements" && unreadAnnouncements > 0 && (
+                  <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+                    {unreadAnnouncements}
+                  </span>
+                )}
               </Link>
             );
           })}
@@ -175,14 +213,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
             Settings
           </Link>
 
-          <Link
-            href="/portal/login"
-            onClick={closeOnMobile}
-            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
           >
             <HugeiconsIcon icon={Logout01Icon} size={20} />
             Log out
-          </Link>
+          </button>
         </div>
       </aside>
     </>

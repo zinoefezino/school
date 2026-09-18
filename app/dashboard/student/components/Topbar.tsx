@@ -2,7 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Menu01Icon, BellIcon } from "@hugeicons/core-free-icons";
+import { Menu01Icon } from "@hugeicons/core-free-icons";
 
 const titles: Record<string, string> = {
   "/dashboard/student": "Dashboard",
@@ -40,14 +40,6 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
       </div>
 
       <div className="flex items-center gap-4">
-        <button
-          aria-label="Notifications"
-          className="relative text-foreground/60 hover:text-foreground"
-        >
-          <HugeiconsIcon icon={BellIcon} size={22} />
-          <span className="absolute -right-0.5 -top-0.5 h-2 w-2 rounded-full bg-blue" />
-        </button>
-
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-sm font-medium text-navy">
             C

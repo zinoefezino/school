@@ -70,10 +70,18 @@ export default function FeesPage() {
         <p className="text-sm text-foreground/60">
           {invoices.length} invoices this term
         </p>
-        <button className="flex items-center gap-2 rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-blue-light">
-          <HugeiconsIcon icon={Download01Icon} size={18} />
-          Export
-        </button>
+        <div className="flex gap-2">
+          <a
+            href="/dashboard/admin/fees/schedule"
+            className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-blue-light"
+          >
+            Fee schedules
+          </a>
+          <button className="flex items-center gap-2 rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy transition-colors hover:bg-blue-light">
+            <HugeiconsIcon icon={Download01Icon} size={18} />
+            Export
+          </button>
+        </div>
       </div>
 
       <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">

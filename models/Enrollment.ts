@@ -4,6 +4,7 @@ export interface IEnrollment extends Document {
   student: Types.ObjectId;
   classSection: Types.ObjectId;
   term: Types.ObjectId;
+  status: "ACTIVE" | "COMPLETED";
 }
 
 const enrollmentSchema = new Schema<IEnrollment>({
@@ -14,6 +15,7 @@ const enrollmentSchema = new Schema<IEnrollment>({
     required: true,
   },
   term: { type: Schema.Types.ObjectId, ref: "Term", required: true },
+  status: { type: String, enum: ["ACTIVE", "COMPLETED"], default: "ACTIVE" },
 });
 
 enrollmentSchema.index({ student: 1, term: 1 }, { unique: true });

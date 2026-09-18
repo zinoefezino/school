@@ -15,11 +15,14 @@ import {
   Coins01Icon,
   Invoice01Icon,
   Megaphone01Icon,
-  Message01Icon,
   Logout01Icon,
   Cancel01Icon,
   ChevronDownIcon,
 } from "@hugeicons/core-free-icons";
+import {
+  announcementReadStorageKey,
+  unreadAnnouncementsFor,
+} from "../../../../lib/announcements";
 
 type NavItem = {
   label: string;
@@ -98,11 +101,6 @@ const bottomLevel: NavItem[] = [
     href: "/dashboard/student/announcements",
     icon: Megaphone01Icon,
   },
-  {
-    label: "Messages",
-    href: "/dashboard/student/messages",
-    icon: Message01Icon,
-  },
 ];
 
 interface SidebarProps {
@@ -119,6 +117,20 @@ function groupForPath(pathname: string) {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const logout = async () => {
+    await fetch("/api/auth/logout", { method: "POST" });
+    window.location.href = "/portal/login";
+  };
+  const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
+
+  useEffect(() => {
+    const hasReadAnnouncements =
+      window.localStorage.getItem(announcementReadStorageKey("STUDENT")) ===
+      "true";
+    setUnreadAnnouncements(
+      hasReadAnnouncements ? 0 : unreadAnnouncementsFor("STUDENT"),
+    );
+  }, [pathname]);
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const [openGroup, setOpenGroup] = useState<string | null>(
@@ -179,7 +191,16 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           itemRefs.current[item.href] = el;
         }}
         href={item.href}
-        onClick={closeOnMobile}
+        onClick={() => {
+          if (item.label === "Announcements") {
+            window.localStorage.setItem(
+              announcementReadStorageKey("STUDENT"),
+              "true",
+            );
+            setUnreadAnnouncements(0);
+          }
+          closeOnMobile();
+        }}
         className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 lg:hover:bg-transparent ${
           isActive
             ? "text-white/60 lg:font-semibold lg:text-navy"
@@ -188,6 +209,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         <HugeiconsIcon icon={item.icon} size={20} />
         <span>{item.label}</span>
+        {item.label === "Announcements" && unreadAnnouncements > 0 && (
+          <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+            {unreadAnnouncements}
+          </span>
+        )}
       </Link>
     );
   };
@@ -280,14 +306,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         <div className="border-t border-white/10 px-3 py-4">
-          <Link
-            href="/portal/login"
-            onClick={closeOnMobile}
-            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
+          <button
+            onClick={logout}
+            className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
           >
             <HugeiconsIcon icon={Logout01Icon} size={20} />
             Log out
-          </Link>
+          </button>
         </div>
       </aside>
     </>

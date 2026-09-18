@@ -8,6 +8,7 @@ export interface IInvoice extends Document {
   amount: number;
   dueDate: Date;
   status: InvoiceStatus;
+  classSection: Types.ObjectId;
 }
 
 const invoiceSchema = new Schema<IInvoice>({
@@ -19,6 +20,11 @@ const invoiceSchema = new Schema<IInvoice>({
     type: String,
     enum: ["PENDING", "PAID", "OVERDUE"],
     default: "PENDING",
+  },
+  classSection: {
+    type: Schema.Types.ObjectId,
+    ref: "ClassSection",
+    required: true,
   },
 });
 

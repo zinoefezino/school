@@ -66,7 +66,10 @@ export default function ClassesPage() {
                 <h3 className="text-base font-medium text-foreground">
                   {cls.classLevel} {cls.section}
                 </h3>
-                <p className="mt-1 text-sm text-foreground/60">{cls.teacher}</p>
+                <p className="mt-1 text-xs text-foreground/50">Class teacher</p>
+                <p className="mt-0.5 text-sm text-foreground/60">
+                  {cls.teacher}
+                </p>
               </div>
               <button
                 aria-label="More options"

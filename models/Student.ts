@@ -5,6 +5,7 @@ export interface IStudent extends Document {
   admissionNumber: string;
   fullName: string;
   dateOfBirth: Date;
+  gender?: "male" | "female";
   photoUrl?: string;
   guardian?: Types.ObjectId;
 }
@@ -19,6 +20,7 @@ const studentSchema = new Schema<IStudent>({
   admissionNumber: { type: String, required: true, unique: true },
   fullName: { type: String, required: true },
   dateOfBirth: { type: Date, required: true },
+  gender: { type: String, enum: ["male", "female"] },
   photoUrl: String,
   guardian: { type: Schema.Types.ObjectId, ref: "Guardian" },
 });
