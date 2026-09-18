@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  UserAdd01Icon,
-  Search01Icon,
-  MoreHorizontalIcon,
-} from "@hugeicons/core-free-icons";
+import { UserAdd01Icon, Search01Icon } from "@hugeicons/core-free-icons";
+import ActionMenu from "../components/ActionMenu";
 
 type Staff = {
   _id: string;
@@ -113,12 +110,11 @@ export default function StaffPage() {
                     {member.user?.email ?? "-"}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      aria-label={`More options for ${member.fullName}`}
-                      className="text-foreground/40"
-                    >
-                      <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
-                    </button>
+                    <ActionMenu
+                      label={member.fullName}
+                      editHref={`/dashboard/admin/staff/${member._id}/edit`}
+                      deactivateHref={`/api/admin/staff/${member._id}`}
+                    />
                   </td>
                 </tr>
               ))

@@ -4,10 +4,10 @@ import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
-  MoreHorizontalIcon,
   Search01Icon,
   StudentsIcon,
 } from "@hugeicons/core-free-icons";
+import ActionMenu from "../components/ActionMenu";
 
 type Student = {
   _id: string;
@@ -131,12 +131,11 @@ export default function StudentsPage() {
                     </span>
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <button
-                      aria-label={`More options for ${student.fullName}`}
-                      className="text-foreground/40"
-                    >
-                      <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
-                    </button>
+                    <ActionMenu
+                      label={student.fullName}
+                      editHref={`/dashboard/admin/students/${student._id}/edit`}
+                      deactivateHref={`/api/admin/students/${student._id}`}
+                    />
                   </td>
                 </tr>
               ))

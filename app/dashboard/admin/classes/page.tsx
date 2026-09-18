@@ -2,11 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Add01Icon,
-  MoreHorizontalIcon,
-  StudentsIcon,
-} from "@hugeicons/core-free-icons";
+import { Add01Icon, StudentsIcon } from "@hugeicons/core-free-icons";
+import ActionMenu from "../components/ActionMenu";
 
 type ClassRow = {
   _id: string;
@@ -63,12 +60,11 @@ export default function ClassesPage() {
                     {cls.classTeacher?.fullName ?? "Unassigned"}
                   </p>
                 </div>
-                <button
-                  aria-label="More options"
-                  className="text-foreground/40"
-                >
-                  <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
-                </button>
+                <ActionMenu
+                  label={`${cls.classLevel?.name} ${cls.name}`}
+                  editHref={`/dashboard/admin/classes/${cls._id}/edit`}
+                  deactivateHref={`/api/admin/classes/${cls._id}`}
+                />
               </div>
               <div className="mt-5 flex items-center gap-2 text-sm text-foreground/70">
                 <HugeiconsIcon

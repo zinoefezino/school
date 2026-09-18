@@ -1,14 +1,15 @@
 "use client";
 
 import Link from "next/link";
-import { FormEvent, useState } from "react";
+import { FormEvent, Suspense, useState } from "react";
 import { useSearchParams } from "next/navigation";
 
-export default function ResetPasswordPage() {
+function ResetPasswordForm() {
   const searchParams = useSearchParams();
   const token = searchParams.get("token") ?? "";
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
+
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
@@ -17,15 +18,20 @@ export default function ResetPasswordPage() {
       setError("Passwords do not match.");
       return;
     }
-    const response = await fetch("/api/auth/reset-password", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ token, password: form.get("password") }),
-    });
-    const data = await response.json();
-    if (!response.ok) setError(data.error);
-    else setMessage(data.message);
+    try {
+      const response = await fetch("/api/auth/reset-password", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token, password: form.get("password") }),
+      });
+      const data = await response.json();
+      if (!response.ok) setError(data.error ?? "Something went wrong.");
+      else setMessage(data.message);
+    } catch {
+      setError("Network error. Please try again.");
+    }
   }
+
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6 py-10">
       <div className="w-full max-w-md rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
@@ -70,5 +76,13 @@ export default function ResetPasswordPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={null}>
+      <ResetPasswordForm />
+    </Suspense>
   );
 }
