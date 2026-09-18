@@ -22,9 +22,23 @@ export async function GET() {
 }
 
 export async function POST(request: Request) {
+  const session = await getSession();
+  if (!session)
+    return NextResponse.json(
+      { error: "Authentication is required." },
+      { status: 401 },
+    );
+  if (session.role !== "ADMIN")
+    return NextResponse.json(
+      { error: "Only admins can publish announcements." },
+      { status: 403 },
+    );
+
   try {
     const body = await request.json();
-    const audiences = Array.isArray(body.audiences) ? body.audiences : [];
+    const audiences: unknown[] = Array.isArray(body.audiences)
+      ? [...new Set(body.audiences)]
+      : [];
 
     if (
       typeof body.title !== "string" ||
@@ -33,7 +47,7 @@ export async function POST(request: Request) {
       !body.body.trim() ||
       audiences.length === 0 ||
       audiences.some(
-        (audience: unknown) =>
+        (audience) =>
           !allowedAudiences.includes(audience as AnnouncementAudience),
       )
     ) {

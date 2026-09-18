@@ -78,7 +78,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
             required
             name="fullName"
             placeholder="Full name"
-            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -88,7 +88,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
             type="email"
             name="email"
             placeholder="name@example.com"
-            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text base"
           />
         </label>
         <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -99,7 +99,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
             name="temporaryPassword"
             type="password"
             placeholder="At least 8 characters"
-            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+            className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
           />
         </label>
         {role === "PARENT" && (
@@ -108,7 +108,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
             <input
               name="phone"
               placeholder="+234..."
-              className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+              className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
             />
           </label>
         )}
@@ -119,7 +119,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
               <input
                 name="department"
                 placeholder="Mathematics"
-                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -127,7 +127,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
               <input
                 name="phone"
                 placeholder="+234..."
-                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
               />
             </label>
           </>
@@ -140,7 +140,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
                 required
                 name="admissionNumber"
                 placeholder="FA-2026-0142"
-                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
@@ -149,7 +149,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
                 required
                 type="date"
                 name="dateOfBirth"
-                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
               />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-foreground">

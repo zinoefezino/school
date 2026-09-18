@@ -39,7 +39,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
         <a href="#" className="flex items-center gap-2.5">
-          <span className="text-lg font-medium text-navy">School</span>
+          <span className="text-lg font-medium ">School</span>
         </a>
 
         <nav className="hidden items-center gap-8 lg:flex">
