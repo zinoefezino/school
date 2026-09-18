@@ -1,133 +1,113 @@
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
-  UserAdd01Icon,
-  Search01Icon,
-  MoreHorizontalIcon,
+  CalendarCheckIcon,
+  Coins01Icon,
+  TaskDaily01Icon,
+  Calendar03Icon,
+  ArrowRight02Icon,
+  Megaphone01Icon,
 } from "@hugeicons/core-free-icons";
 
-const students = [
-  {
-    name: "Chidera Okafor",
-    admissionNo: "FA-2026-0142",
-    classSection: "JSS1 Gold",
-    guardian: "Ngozi Okafor",
-    status: "Active",
-  },
-  {
-    name: "Tamuno Briggs",
-    admissionNo: "FA-2025-0098",
-    classSection: "SS2 Diamond",
-    guardian: "Ebiere Briggs",
-    status: "Active",
-  },
-  {
-    name: "Amara Chukwu",
-    admissionNo: "FA-2026-0143",
-    classSection: "Primary 4",
-    guardian: "Ifeoma Chukwu",
-    status: "Active",
-  },
-  {
-    name: "David Effiong",
-    admissionNo: "FA-2024-0071",
-    classSection: "SS3 Emerald",
-    guardian: "Grace Effiong",
-    status: "Inactive",
-  },
-  {
-    name: "Zainab Bello",
-    admissionNo: "FA-2026-0144",
-    classSection: "JSS2 Silver",
-    guardian: "Musa Bello",
-    status: "Active",
-  },
+const stats = [
+  { label: "Attendance this term", value: "94%", icon: CalendarCheckIcon },
+  { label: "Fees balance", value: "₦0", icon: Coins01Icon },
+  { label: "Pending assignments", value: "2", icon: TaskDaily01Icon },
 ];
 
-const statusStyles: Record<string, string> = {
-  Active: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
-  Inactive: "bg-foreground/5 text-foreground/50",
-};
+const todayTimetable = [
+  { time: "8:00 AM", subject: "Mathematics", room: "Room 4" },
+  { time: "9:40 AM", subject: "English Language", room: "Room 4" },
+  { time: "11:20 AM", subject: "Basic Science", room: "Lab 1" },
+];
 
-export default function StudentsPage() {
+const announcements = [
+  { title: "Mid-term break notice", date: "Sep 15, 2026" },
+  { title: "Inter-house sports day", date: "Sep 2, 2026" },
+];
+
+export default function StudentDashboard() {
   return (
-    <div className="flex flex-col gap-6">
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <div className="flex items-center gap-2 rounded-full border border-black/10 bg-white px-3.5 py-2">
-          <HugeiconsIcon
-            icon={Search01Icon}
-            size={18}
-            className="text-foreground/40"
-          />
-          <input
-            type="text"
-            placeholder="Search students..."
-            className="w-56 text-sm text-foreground outline-none placeholder:text-foreground/40"
-          />
-        </div>
-
-        <a
-          href="/dashboard/admin/students/new"
-          className="flex items-center gap-2 rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
-        >
-          <HugeiconsIcon icon={UserAdd01Icon} size={18} />
-          Add student
-        </a>
+    <div className="flex flex-col gap-8">
+      <div className="grid gap-4 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div
+            key={stat.label}
+            className="rounded-2xl border border-navy/10 bg-white p-5"
+          >
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light text-blue">
+              <HugeiconsIcon icon={stat.icon} size={20} />
+            </span>
+            <p className="mt-4 text-2xl font-medium text-foreground">
+              {stat.value}
+            </p>
+            <p className="mt-1 text-sm text-foreground/60">{stat.label}</p>
+          </div>
+        ))}
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-navy/10 text-xs font-medium uppercase tracking-wide text-foreground/50">
-              <th className="px-6 py-3.5">Student</th>
-              <th className="px-6 py-3.5">Admission no.</th>
-              <th className="px-6 py-3.5">Class</th>
-              <th className="px-6 py-3.5">Guardian</th>
-              <th className="px-6 py-3.5">Status</th>
-              <th className="px-6 py-3.5" />
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-black/5">
-            {students.map((student) => (
-              <tr key={student.admissionNo} className="text-sm">
-                <td className="flex items-center gap-3 whitespace-nowrap px-6 py-3.5">
-                  <span className="flex h-8 w-8 items-center justify-center rounded-full bg-blue-light text-xs font-medium text-navy">
-                    {student.name
-                      .split(" ")
-                      .map((n) => n[0])
-                      .join("")}
-                  </span>
-                  <span className="font-medium text-foreground">
-                    {student.name}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {student.admissionNo}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {student.classSection}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-foreground/70">
-                  {student.guardian}
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5">
-                  <span
-                    className={`rounded-full px-2.5 py-1 text-xs font-medium ${statusStyles[student.status]}`}
-                  >
-                    {student.status}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-6 py-3.5 text-right">
-                  <button
-                    aria-label="More options"
-                    className="text-foreground/40 hover:text-foreground"
-                  >
-                    <HugeiconsIcon icon={MoreHorizontalIcon} size={18} />
-                  </button>
-                </td>
-              </tr>
+      <div className="grid gap-6 lg:grid-cols-3">
+        <div className="rounded-2xl border border-navy/10 bg-white p-6 lg:col-span-2">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-medium text-foreground">
+              Today's classes
+            </h2>
+            <a
+              href="/dashboard/student/timetable"
+              className="flex items-center gap-1 text-sm font-medium text-blue"
+            >
+              Full timetable
+              <HugeiconsIcon icon={ArrowRight02Icon} size={14} />
+            </a>
+          </div>
+          <div className="mt-4 divide-y divide-black/5">
+            {todayTimetable.map((slot) => (
+              <div
+                key={slot.time}
+                className="flex items-center gap-4 py-3.5 first:pt-0"
+              >
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-blue-light text-blue">
+                  <HugeiconsIcon icon={Calendar03Icon} size={16} />
+                </span>
+                <div className="flex-1">
+                  <p className="text-sm font-medium text-foreground">
+                    {slot.subject}
+                  </p>
+                  <p className="text-xs text-foreground/50">{slot.room}</p>
+                </div>
+                <span className="text-sm text-foreground/60">{slot.time}</span>
+              </div>
             ))}
-          </tbody>
-        </table>
+          </div>
+        </div>
+
+        <div className="rounded-2xl border border-navy/10 bg-white p-6">
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-medium text-foreground">
+              Announcements
+            </h2>
+            <a
+              href="/dashboard/student/announcements"
+              className="text-sm font-medium text-blue"
+            >
+              See all
+            </a>
+          </div>
+          <div className="mt-4 flex flex-col gap-4">
+            {announcements.map((item) => (
+              <div key={item.title} className="flex items-start gap-3">
+                <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-blue-light text-blue">
+                  <HugeiconsIcon icon={Megaphone01Icon} size={16} />
+                </span>
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {item.title}
+                  </p>
+                  <p className="text-xs text-foreground/50">{item.date}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   );
