@@ -10,7 +10,14 @@ import { promisify } from "util";
 const scrypt = promisify(nodeScrypt);
 export const sessionCookieName = "school_session";
 export const resetTokenLifetimeMs = 30 * 60 * 1000;
-const sessionLifetimeSeconds = 60 * 60 * 8;
+const defaultSessionLifetimeSeconds = 60 * 60 * 8;
+
+function sessionLifetimeSeconds() {
+  const configured = Number(process.env.SESSION_MAX_AGE_SECONDS);
+  return Number.isFinite(configured) && configured > 0
+    ? Math.floor(configured)
+    : defaultSessionLifetimeSeconds;
+}
 
 type SessionPayload = {
   userId: string;
@@ -54,7 +61,7 @@ export async function verifyPassword(password: string, storedHash: string) {
 export function createSessionToken(payload: Omit<SessionPayload, "expiresAt">) {
   const value: SessionPayload = {
     ...payload,
-    expiresAt: Date.now() + sessionLifetimeSeconds * 1000,
+    expiresAt: Date.now() + sessionLifetimeSeconds() * 1000,
   };
   const encoded = encode(JSON.stringify(value));
   const signature = createHmac("sha256", authSecret())
@@ -86,6 +93,6 @@ export function sessionCookieOptions() {
     sameSite: "lax" as const,
     secure: process.env.NODE_ENV === "production",
     path: "/",
-    maxAge: sessionLifetimeSeconds,
+    maxAge: sessionLifetimeSeconds(),
   };
 }

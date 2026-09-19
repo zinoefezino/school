@@ -24,7 +24,13 @@ export default function StaffAnnouncementsPage() {
   useEffect(() => {
     fetch("/api/announcements")
       .then(async (response) => (response.ok ? response.json() : null))
-      .then((data) => setAnnouncements(data?.announcements ?? []))
+      .then((data) => {
+        const nextAnnouncements = data?.announcements ?? [];
+        setAnnouncements(nextAnnouncements);
+        if (nextAnnouncements.length > 0) {
+          fetch("/api/announcements/read", { method: "POST" });
+        }
+      })
       .catch(() => setAnnouncements([]))
       .finally(() => setLoading(false));
   }, []);

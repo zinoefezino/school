@@ -3,6 +3,7 @@ import { Types } from "mongoose";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
 import Announcement from "../../../../models/Announcement";
+import AnnouncementRead from "../../../../models/AnnouncementRead";
 
 export async function DELETE(
   _request: Request,
@@ -34,6 +35,8 @@ export async function DELETE(
       { error: "Announcement not found." },
       { status: 404 },
     );
+
+  await AnnouncementRead.deleteMany({ announcement: id });
 
   return NextResponse.json({ deleted: true });
 }

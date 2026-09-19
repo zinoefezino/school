@@ -13,10 +13,7 @@ export function unauthorizedParentResponse() {
   );
 }
 
-export async function getGuardianId(request: Request) {
-  const guardianId = request.headers.get("x-guardian-id");
-  if (guardianId && Types.ObjectId.isValid(guardianId)) return guardianId;
-
+export async function getGuardianId() {
   const cookieStore = await cookies();
   const token = cookieStore.get(sessionCookieName)?.value;
   const session = token ? verifySessionToken(token) : null;
@@ -34,8 +31,8 @@ export async function getGuardianId(request: Request) {
   return guardian?._id.toString() ?? null;
 }
 
-export async function getAuthorizedChildren(request: Request) {
-  const guardianId = await getGuardianId(request);
+export async function getAuthorizedChildren() {
+  const guardianId = await getGuardianId();
   if (!guardianId) return null;
   await connectDB();
   return Student.find({ guardian: guardianId })
@@ -43,8 +40,8 @@ export async function getAuthorizedChildren(request: Request) {
     .lean();
 }
 
-export async function getAuthorizedChild(request: Request, studentId: string) {
-  const guardianId = await getGuardianId(request);
+export async function getAuthorizedChild(studentId: string) {
+  const guardianId = await getGuardianId();
   if (!guardianId || !Types.ObjectId.isValid(studentId)) return null;
   await connectDB();
   return Student.findOne({ _id: studentId, guardian: guardianId })

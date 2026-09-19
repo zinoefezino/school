@@ -6,9 +6,9 @@ import {
 import Invoice from "../../../../models/Invoice";
 import Payment from "../../../../models/Payment";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const children = await getAuthorizedChildren(request);
+    const children = await getAuthorizedChildren();
     if (!children) return unauthorizedParentResponse();
     const invoices = await Invoice.find({
       student: { $in: children.map((child) => child._id) },

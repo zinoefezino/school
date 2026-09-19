@@ -4,7 +4,6 @@ import {
   ArrowRight02Icon,
   CheckmarkCircle02Icon,
   File01Icon,
-  UserMultiple02Icon,
 } from "@hugeicons/core-free-icons";
 import Header from "../../components/Header";
 import Footer from "../../components/Footer";
@@ -20,7 +19,7 @@ const steps = [
     number: "02",
     title: "Submit application details",
     description:
-      "Provide student biodata, parent/guardian details, previous school records, and required documents.",
+      "Provide the student's details, parent or guardian contact information, previous school records, and required documents.",
   },
   {
     number: "03",
@@ -30,9 +29,9 @@ const steps = [
   },
   {
     number: "04",
-    title: "Offer, fees, and enrollment",
+    title: "Offer, fees, and welcome",
     description:
-      "After admission is approved, the student account is created, class enrollment is assigned, and billing can begin.",
+      "After admission is approved, families receive the offer details, fee guidance, class placement, and welcome information.",
   },
 ];
 
@@ -46,10 +45,10 @@ const requirements = [
 ];
 
 const notes = [
-  "Students are assigned to classes through active enrollments.",
-  "Parents are linked to students so they can view fees, attendance, results, and announcements.",
+  "Students are placed in classes based on age, academic readiness, and previous school records.",
+  "Parents receive clear communication about fees, term dates, school expectations, and student progress.",
   "Class placement depends on age, previous school records, and assessment outcome.",
-  "Payment gateway integration is planned as the final phase; current fee records are managed in the dashboard.",
+  "New families are guided through uniforms, books, resumption details, and first week expectations.",
 ];
 
 export default function AdmissionsPage() {
@@ -60,9 +59,6 @@ export default function AdmissionsPage() {
         <section className="bg-blue-light/35">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-[1fr_480px] lg:py-24">
             <div>
-              {/* <p className="text-sm font-medium uppercase tracking-wide text-blue">
-                Admissions
-              </p> */}
               <h1 className="mt-3 text-4xl font-bold leading-tight text-foreground lg:text-5xl">
                 Start your child&apos;s journey with School
               </h1>
@@ -96,9 +92,10 @@ export default function AdmissionsPage() {
             <h2 className="text-3xl font-bold text-foreground">
               Admission steps
             </h2>
-            <p className="mt-4 text-base leading-7 text-foreground/70">
-              From enquiry to enrollment, the process keeps both the student and
-              guardian records connected in the school portal.
+              <p className="mt-4 text-base leading-7 text-foreground/70">
+              From enquiry to enrollment, our admissions team helps families
+              understand the school, prepare the right documents, and choose the
+              best class placement for each child.
             </p>
           </div>
 
@@ -132,8 +129,8 @@ export default function AdmissionsPage() {
                 What to prepare
               </h2>
               <p className="mt-4 text-base leading-7 text-foreground/70">
-                These details help the school create accurate student, parent,
-                class, and billing records.
+                These details help us understand the child&apos;s background,
+                support needs, class placement, and family contact information.
               </p>
             </div>
             <div className="grid gap-3">
@@ -154,19 +151,19 @@ export default function AdmissionsPage() {
           </div>
         </section>
 
-        {/* <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+        <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <div className="grid gap-10 lg:grid-cols-[420px_1fr]">
             <div>
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-light text-blue">
-                <HugeiconsIcon icon={UserMultiple02Icon} size={24} />
+                <HugeiconsIcon icon={CheckmarkCircle02Icon} size={24} />
               </div>
               <h2 className="mt-5 text-3xl font-bold text-foreground">
-                After admission
+                After acceptance
               </h2>
               <p className="mt-4 text-base leading-7 text-foreground/70">
-                Once a student is admitted, the admin dashboard connects the
-                student to their parent, active class enrollment, class teacher,
-                subject teachers, invoices, and portal login.
+                Once a place is offered, our team helps each family prepare for
+                a smooth start from class placement and fee guidance to books,
+                uniforms, and resumption information.
               </p>
             </div>
             <div className="grid gap-4 sm:grid-cols-2">
@@ -180,7 +177,7 @@ export default function AdmissionsPage() {
               ))}
             </div>
           </div>
-        </section> */}
+        </section>
       </main>
       <Footer />
     </div>

@@ -8,9 +8,9 @@ import Assessment from "../../../../models/Assessment";
 import Invoice from "../../../../models/Invoice";
 import Term from "../../../../models/Term";
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const children = await getAuthorizedChildren(request);
+    const children = await getAuthorizedChildren();
     if (!children) return unauthorizedParentResponse();
     const childIds = children.map((child) => child._id);
     const [announcements, invoices, publishedTerms] = await Promise.all([

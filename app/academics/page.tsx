@@ -13,7 +13,7 @@ import Footer from "../../components/Footer";
 const stages = [
   {
     title: "Early years",
-    ageRange: "Ages 3–5",
+    ageRange: "Ages 3 to 5",
     image: "/img1.jpg",
     icon: Book02Icon,
     description:
@@ -21,7 +21,7 @@ const stages = [
   },
   {
     title: "Primary school",
-    ageRange: "Ages 6–11",
+    ageRange: "Ages 6 to 11",
     image: "/hero3.png",
     icon: GraduationScrollIcon,
     description:
@@ -29,21 +29,21 @@ const stages = [
   },
   {
     title: "Secondary school",
-    ageRange: "Ages 12–18",
+    ageRange: "Ages 12 to 18",
     image: "/hero2.jpg",
     icon: Certificate01Icon,
     description:
-      "Students prepare for external examinations, leadership, higher education, and real-world problem solving.",
+      "Students prepare for external examinations, leadership, higher education, and real world problem solving.",
   },
 ];
 
 const approach = [
   "Structured lessons with continuous assessment",
-  "Subject-specialist teachers assigned per class",
-  "Class teachers who mentor and monitor each class",
-  "Published results available through the student and parent portals",
+  "Subject specialist teachers for focused instruction",
+  "Class teachers who mentor and support each class",
+  "Clear progress reports for students and parents",
   "Balanced academics, sports, clubs, creativity, and character",
-  "Data-backed attendance, results, assignments, and timetable tracking",
+  "Regular assignments, attendance monitoring, and termly assessments",
 ];
 
 const subjects = [
@@ -69,16 +69,13 @@ export default function AcademicsPage() {
         <section className="bg-blue-light/35">
           <div className="mx-auto grid max-w-6xl items-center gap-10 px-6 py-16 lg:grid-cols-[1fr_480px] lg:py-24">
             <div>
-              {/* <p className="text-sm font-medium uppercase tracking-wide text-blue">
-                Academics
-              </p> */}
               <h1 className="mt-3 text-4xl font-bold leading-tight text-foreground lg:text-5xl">
                 A clear learning path from early years to graduation
               </h1>
               <p className="mt-5 max-w-2xl text-base leading-8 text-foreground/70">
                 Our academic structure supports every stage of growth with
-                strong classroom teaching, subject-specific instruction,
-                continuous assessment, and parent-visible progress.
+                strong classroom teaching, subject specific instruction,
+                continuous assessment, and parent visible progress.
               </p>
             </div>
             <div className="relative h-80 overflow-hidden rounded-3xl bg-blue-light shadow-sm lg:h-96">
@@ -147,10 +144,10 @@ export default function AcademicsPage() {
                 Teaching and assessment approach
               </h2>
               <p className="mt-4 text-base leading-7 text-foreground/70">
-                The school separates class heads from subject teachers. Class
-                teachers mentor and monitor their class, while assigned subject
-                teachers handle subject instruction, results, assignments, and
-                timetable responsibilities.
+                Students are supported by class teachers who know them well and
+                subject specialists who bring depth to each lesson. This balance
+                helps every learner receive both personal guidance and strong
+                academic instruction.
               </p>
             </div>
             <div className="grid gap-3">
@@ -178,8 +175,9 @@ export default function AcademicsPage() {
                 Subject areas
               </h2>
               <p className="mt-4 text-base leading-7 text-foreground/70">
-                Subjects can be managed in the admin dashboard and assigned to
-                the teachers responsible for each class.
+                Our subject offering gives students a strong foundation in core
+                academics while making room for creativity, technology,
+                leadership, and practical learning.
               </p>
             </div>
             <a

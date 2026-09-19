@@ -21,13 +21,13 @@ const values = [
     icon: HandshakeIcon,
     title: "Integrity",
     description:
-      "Honesty and accountability are non-negotiable, in the classroom and beyond it.",
+      "Honesty and accountability are essential, in the classroom and beyond it.",
   },
   {
     icon: StudentsIcon,
     title: "Community",
     description:
-      "A school is a family — students, staff, and parents working toward the same goal.",
+      "A school is a family where students, staff, and parents work toward the same goal.",
   },
   {
     icon: BulbIcon,
@@ -38,16 +38,16 @@ const values = [
 ];
 
 const leadership = [
-  { name: "Dr. Ifeoma Adeleke", title: "Principal", image: "/teacher.jpg" },
+  { name: "Dr. Ifeoma Adeleke", title: "Principal", image: "/teacher2.jpg" },
   {
     name: "Mr. Bassey Umoh",
     title: "Vice Principal, Academics",
-    image: "/teacher.jpg",
+    image: "/teacher2.jpg",
   },
   {
     name: "Mrs. Ronke Fashina",
     title: "Head of Pastoral Care",
-    image: "/teacher.jpg",
+    image: "/teacher2.jpg",
   },
 ];
 
@@ -103,7 +103,7 @@ export default function AboutPage() {
             <p className="mt-4 text-base leading-7 text-foreground/70">
               Fairview Academy opened its doors in 2005 with two classrooms and
               thirty students. What started as a small neighborhood school grew,
-              term by term, into a full early-years-through-SS3 institution —
+              term by term, into a full early years through SS3 institution
               built on the same founding belief that individual attention
               matters more than class size alone.
             </p>
@@ -123,15 +123,15 @@ export default function AboutPage() {
           <div className="rounded-2xl bg-white p-8">
             <h3 className="text-lg font-medium text-foreground">Our mission</h3>
             <p className="mt-3 text-sm leading-7 text-foreground/70">
-              To provide a well-rounded education that builds strong academic
-              foundations alongside character, curiosity, and confidence —
+              To provide a complete education that builds strong academic
+              foundations alongside character, curiosity, and confidence,
               preparing students not just for exams, but for life after them.
             </p>
           </div>
           <div className="rounded-2xl bg-navy p-8">
             <h3 className="text-lg font-medium text-white">Our vision</h3>
             <p className="mt-3 text-sm leading-7 text-white/70">
-              To be the school families trust most in our community — known for
+              To be the school families trust most in our community, known for
               the quality of our teaching, the care we take with every student,
               and the outcomes our graduates go on to achieve.
             </p>
@@ -180,7 +180,7 @@ export default function AboutPage() {
               School leadership
             </h2>
             <p className="mt-4 text-base leading-7 text-foreground/70">
-              The team responsible for the day-to-day running of Fairview.
+              The team responsible for the daily running of Fairview.
             </p>
           </div>
 

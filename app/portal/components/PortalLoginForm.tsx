@@ -51,7 +51,12 @@ export default function PortalLoginForm({
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error ?? "Unable to sign in.");
-      router.push(redirects[role]);
+      const next = new URLSearchParams(window.location.search).get("next");
+      const redirectTo =
+        next?.startsWith(redirects[role]) && !next.startsWith("//")
+          ? next
+          : redirects[role];
+      router.push(redirectTo);
     } catch (loginError) {
       setError(
         loginError instanceof Error ? loginError.message : "Unable to sign in.",

@@ -27,7 +27,7 @@ const reasons = [
   },
   {
     icon: StudentsIcon,
-    title: "A well-rounded student life",
+    title: "A balanced student life",
     description:
       "Sports, arts, and clubs that help students discover what they're good at beyond the classroom.",
   },

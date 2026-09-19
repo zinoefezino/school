@@ -4,7 +4,6 @@ import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Megaphone01Icon } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
-import { announcementReadIdsStorageKey } from "../../../../lib/announcements";
 
 type Announcement = {
   _id: string;
@@ -23,14 +22,9 @@ export default function AnnouncementsPage() {
       .then((data) => {
         const nextAnnouncements = data?.announcements ?? [];
         setAnnouncements(nextAnnouncements);
-        window.localStorage.setItem(
-          announcementReadIdsStorageKey("STUDENT"),
-          JSON.stringify(
-            nextAnnouncements
-              .map((announcement: Announcement) => announcement._id)
-              .filter(Boolean),
-          ),
-        );
+        if (nextAnnouncements.length > 0) {
+          fetch("/api/announcements/read", { method: "POST" });
+        }
       })
       .catch(() => setAnnouncements([]))
       .finally(() => setLoading(false));

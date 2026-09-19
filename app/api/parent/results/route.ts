@@ -15,7 +15,7 @@ export async function GET(request: Request) {
         { error: "studentId is required." },
         { status: 400 },
       );
-    const child = await getAuthorizedChild(request, studentId);
+    const child = await getAuthorizedChild(studentId);
     if (!child) return unauthorizedParentResponse();
     const termQuery = params.get("termId")
       ? { _id: params.get("termId"), resultsPublished: true }

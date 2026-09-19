@@ -55,8 +55,8 @@ export default function StudentDashboard() {
   if (!data)
     return (
       <div className="rounded-2xl border border-dashed border-navy/20 bg-white p-8 text-sm text-foreground/60">
-        Your student profile is not available yet. Please contact the school
-        administrator.
+        Your dashboard overview is not available yet. Please contact the school
+        office to complete your student setup.
       </div>
     );
   const birthDate = new Date(data.dateOfBirth);
@@ -99,7 +99,7 @@ export default function StudentDashboard() {
             size="md"
           />
           <div>
-            <p className="text-sm text-foreground/50">Student profile</p>
+            <p className="text-sm text-foreground/50">Student overview</p>
             <h1 className="mt-1 text-lg font-medium text-foreground">
               {data.fullName}
             </h1>

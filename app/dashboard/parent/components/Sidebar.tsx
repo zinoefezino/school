@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
@@ -56,6 +56,7 @@ export default function ParentSidebar({
   const router = useRouter();
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
+  const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
   const indicator = useRef({ top: 0, height: 0, visible: false });
   const indicatorRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -87,6 +88,14 @@ export default function ParentSidebar({
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/portal/login");
   };
+  useEffect(() => {
+    fetch("/api/announcements/unread")
+      .then(async (response) =>
+        response.ok ? response.json() : { announcements: 0 },
+      )
+      .then((data) => setUnreadAnnouncements(data.announcements ?? 0))
+      .catch(() => setUnreadAnnouncements(0));
+  }, [pathname]);
   return (
     <>
       <div
@@ -141,6 +150,12 @@ export default function ParentSidebar({
               >
                 <HugeiconsIcon icon={item.icon} size={20} />
                 <span>{item.label}</span>
+                {item.label === "Announcements" &&
+                  unreadAnnouncements > 0 && (
+                    <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+                      {unreadAnnouncements}
+                    </span>
+                  )}
               </Link>
             );
           })}

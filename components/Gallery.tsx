@@ -8,7 +8,7 @@ import { ArrowLeft01Icon, ArrowRight01Icon } from "@hugeicons/core-free-icons";
 const photos = [
   {
     src: "/img1.jpg",
-    caption: "Inter-house sports day",
+    caption: "Inter house sports day",
   },
   {
     src: "/img1.jpg",

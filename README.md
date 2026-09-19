@@ -26,7 +26,10 @@ Create `.env`:
 ```env
 MONGODB_URI=mongodb://127.0.0.1:27017/school
 AUTH_SECRET=replace-with-a-long-random-secret
+SESSION_MAX_AGE_SECONDS=28800
 ```
+
+`SESSION_MAX_AGE_SECONDS` controls how long a login remains valid. The default is `28800` seconds, which is 8 hours. After this time, the signed session expires and protected dashboard pages redirect back to login.
 
 Create the first admin account:
 
@@ -50,6 +53,44 @@ Open [http://localhost:3000](http://localhost:3000).
 - Parent: views children, attendance, results, fees, and announcements.
 
 Students, parents, staff, and admins can change their own passwords from their dashboard settings/password page.
+
+## Authentication and security
+
+The app uses signed HTTP only cookies for login sessions. Session tokens include:
+
+- user id
+- email
+- role
+- expiry time
+
+The cookie is:
+
+- `httpOnly`, so browser JavaScript cannot read it
+- `sameSite: lax`, which helps reduce cross site request risk
+- `secure` in production
+- limited by `SESSION_MAX_AGE_SECONDS`
+
+Protected dashboard routes are guarded by `proxy.ts`:
+
+- `/dashboard/admin` requires an admin session
+- `/dashboard/staff` requires a staff session
+- `/dashboard/parent` requires a parent session
+- `/dashboard/student` requires a student session
+- expired or missing sessions redirect to `/portal/login`
+- users who try to open another role's dashboard are redirected back to their own dashboard
+
+API routes also check the signed session and enforce role specific access on the server. Admin APIs require admin sessions, staff APIs require staff sessions, student APIs require student sessions, and parent APIs only return records linked to the logged in parent account.
+
+Parent access is resolved from the signed session cookie and `Guardian.user`. The app does not trust client supplied guardian or student ids for ownership. Parent child, attendance, fees, and result APIs verify that requested students belong to the logged in parent.
+
+Security notes before production:
+
+- use a long random `AUTH_SECRET`
+- use HTTPS so secure cookies are enforced
+- keep MongoDB credentials private
+- add rate limiting for login, forgot password, and reset password endpoints
+- add email delivery for password resets instead of showing reset links directly in development workflows
+- review audit logging for admin actions such as account creation, deactivation, announcement deletion, and payment updates
 
 ## Academic model
 
@@ -280,7 +321,9 @@ The same announcement system feeds:
 
 Admins can delete announcements so old notices do not pile up.
 
-For students, new announcements show a badge count in the sidebar until the student opens the announcements page.
+For students, parents, and staff, new announcements show a badge count in the sidebar until the user opens the announcements page.
+
+Announcement read state is database backed per user through `AnnouncementRead`, so reading announcements on one device clears the count on other devices for the same login account. Admin deletion also removes the related read receipts.
 
 ### 13. Public news flow
 
@@ -405,8 +448,6 @@ Recent focused checks passed for the new dashboard and subject-teacher work:
 npx tsc --noEmit
 npx eslint <focused files>
 ```
-
-Note: a full TypeScript run later surfaced an unrelated syntax issue in `app/contact/page.tsx`; fix that page before relying on a full-project typecheck.
 
 ## Remaining major phase
 

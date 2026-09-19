@@ -19,7 +19,7 @@ export default function Hero() {
           </h1>
 
           <p className="mt-5 max-w-md text-base leading-7 text-slate-600 sm:text-lg">
-            We blend strong academics with hands-on learning, guiding students
+            We blend strong academics with practical learning, guiding students
             from foundation years through to graduation.
           </p>
 

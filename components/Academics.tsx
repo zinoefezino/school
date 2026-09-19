@@ -11,15 +11,15 @@ const programs = [
   {
     icon: Book02Icon,
     name: "Early years",
-    ageRange: "Ages 3–5",
+    ageRange: "Ages 3 to 5",
     image: "/img1.jpg",
     description:
-      "Play-based learning that builds curiosity, language, and early number sense.",
+      "Play based learning that builds curiosity, language, and early number sense.",
   },
   {
     icon: GraduationScrollIcon,
     name: "Primary school",
-    ageRange: "Ages 6–11",
+    ageRange: "Ages 6 to 11",
     image: "/img1.jpg",
     description:
       "A structured curriculum across core subjects, with room for art, music, and sport.",
@@ -27,10 +27,10 @@ const programs = [
   {
     icon: Certificate01Icon,
     name: "Secondary school",
-    ageRange: "Ages 12–18",
+    ageRange: "Ages 12 to 18",
     image: "/hero2.jpg",
     description:
-      "Exam-track academics alongside guidance for university and career pathways.",
+      "Exam track academics alongside guidance for university and career pathways.",
   },
 ];
 

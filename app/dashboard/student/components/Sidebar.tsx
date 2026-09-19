@@ -22,7 +22,6 @@ import {
   Setting06Icon,
 } from "@hugeicons/core-free-icons";
 import {
-  announcementReadIdsStorageKey,
   studentReadResultTermsStorageKey,
 } from "../../../../lib/announcements";
 
@@ -141,25 +140,19 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       }
     };
     Promise.all([
-      fetch("/api/announcements").then(async (response) =>
-        response.ok ? response.json() : { announcements: [] },
+      fetch("/api/announcements/unread").then(async (response) =>
+        response.ok ? response.json() : { announcements: 0 },
       ),
       fetch("/api/dashboard/student/results").then(async (response) =>
         response.ok ? response.json() : { periods: [] },
       ),
     ])
       .then(([announcementData, resultData]) => {
-        const readAnnouncementIds = new Set(
-          readArray(announcementReadIdsStorageKey("STUDENT")),
-        );
         const readResultTerms = new Set(
           readArray(studentReadResultTermsStorageKey()),
         );
         setBadges({
-          announcements: (announcementData.announcements ?? []).filter(
-            (item: { _id?: string }) =>
-              item._id && !readAnnouncementIds.has(item._id),
-          ).length,
+          announcements: announcementData.announcements ?? 0,
           results: (resultData.periods ?? []).filter(
             (period: { termId?: string }) =>
               period.termId && !readResultTerms.has(period.termId),

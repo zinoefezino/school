@@ -20,9 +20,9 @@ function initials(name: string) {
     .join("");
 }
 
-export async function GET(request: Request) {
+export async function GET() {
   try {
-    const guardianId = await getGuardianId(request);
+    const guardianId = await getGuardianId();
     if (!guardianId) return unauthorizedParentResponse();
 
     const [parent, children] = await Promise.all([

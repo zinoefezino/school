@@ -14,10 +14,6 @@ import {
   Logout01Icon,
   Setting06Icon,
 } from "@hugeicons/core-free-icons";
-import {
-  announcementReadStorageKey,
-  unreadAnnouncementsFor,
-} from "../../../../lib/announcements";
 
 const navItems = [
   { label: "Overview", href: "/dashboard/staff", icon: DashboardSquare01Icon },
@@ -64,14 +60,12 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
-    Promise.resolve().then(() => {
-      const hasReadAnnouncements =
-        window.localStorage.getItem(announcementReadStorageKey("STAFF")) ===
-        "true";
-      setUnreadAnnouncements(
-        hasReadAnnouncements ? 0 : unreadAnnouncementsFor("STAFF"),
-      );
-    });
+    fetch("/api/announcements/unread")
+      .then(async (response) =>
+        response.ok ? response.json() : { announcements: 0 },
+      )
+      .then((data) => setUnreadAnnouncements(data.announcements ?? 0))
+      .catch(() => setUnreadAnnouncements(0));
   }, [pathname]);
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);
@@ -162,13 +156,6 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
                 }}
                 href={item.href}
                 onClick={() => {
-                  if (item.label === "Announcements") {
-                    window.localStorage.setItem(
-                      announcementReadStorageKey("STAFF"),
-                      "true",
-                    );
-                    setUnreadAnnouncements(0);
-                  }
                   closeOnMobile();
                 }}
                 className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors lg:mr-0 ${isActive ? "text-white/60 lg:font-semibold lg:text-navy" : "text-white/60 hover:bg-white/5 hover:text-white"}`}

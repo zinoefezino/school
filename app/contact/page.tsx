@@ -31,7 +31,7 @@ const contactMethods = [
 ];
 
 const officeHours = [
-  { day: "Monday – Friday", hours: "7:30 AM – 4:00 PM" },
+  { day: "Monday to Friday", hours: "7:30 AM to 4:00 PM" },
   { day: "Saturday", hours: "Closed" },
   { day: "Sunday", hours: "Closed" },
 ];
