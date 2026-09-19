@@ -26,18 +26,35 @@ export default function StudentsPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(25);
   const [pages, setPages] = useState(1);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     const timer = setTimeout(() => {
       setLoading(true);
+      setError("");
       fetch(
         `/api/admin/students?search=${encodeURIComponent(search)}&page=${page}&limit=${limit}`,
       )
-        .then((response) => response.json())
+        .then(async (response) => {
+          const data = await response.json();
+          if (!response.ok)
+            throw new Error(data.error ?? "Unable to load students.");
+          return data;
+        })
         .then((data) => {
           setStudents(data.students ?? []);
           setTotal(data.total ?? 0);
           setPages(data.pages ?? 1);
+        })
+        .catch((studentError) => {
+          setStudents([]);
+          setTotal(0);
+          setPages(1);
+          setError(
+            studentError instanceof Error
+              ? studentError.message
+              : "Unable to load students.",
+          );
         })
         .finally(() => setLoading(false));
     }, 250);
@@ -135,7 +152,7 @@ export default function StudentsPage() {
                   colSpan={6}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
-                  No students found.
+                  {error || "No students found."}
                 </td>
               </tr>
             ) : (
