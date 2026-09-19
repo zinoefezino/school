@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { connection } from "next/server";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Calendar03Icon } from "@hugeicons/core-free-icons";
 import Header from "../../components/Header";
@@ -21,6 +22,7 @@ function formatDate(value?: string | Date) {
 }
 
 export default async function NewsPage() {
+  await connection();
   await connectDB();
   const posts = (await NewsPost.find({ status: "PUBLISHED" })
     .sort({ publishedAt: -1, createdAt: -1 })

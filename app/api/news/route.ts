@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { connectDB } from "../../../lib/mongodb";
 import { getSession } from "../../../lib/session";
 import NewsPost, { type NewsStatus } from "../../../models/NewsPost";
@@ -44,7 +45,10 @@ export async function GET(request: Request) {
     .sort({ publishedAt: -1, createdAt: -1 })
     .limit(limit)
     .lean();
-  return NextResponse.json({ posts });
+  return NextResponse.json(
+    { posts },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }
 
 export async function POST(request: Request) {
@@ -92,6 +96,12 @@ export async function POST(request: Request) {
     publishedAt: status === "PUBLISHED" ? new Date() : undefined,
     publishedBy: session.userId,
   });
+
+  if (status === "PUBLISHED") {
+    revalidatePath("/");
+    revalidatePath("/news");
+    revalidatePath(`/news/${post.slug}`);
+  }
 
   return NextResponse.json({ post }, { status: 201 });
 }

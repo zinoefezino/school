@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { revalidatePath } from "next/cache";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
 import NewsPost from "../../../../models/NewsPost";
@@ -28,8 +29,18 @@ export async function DELETE(
 
   const { slug } = await params;
   await connectDB();
-  const result = await NewsPost.deleteOne({ slug });
+  const post = await NewsPost.findOneAndDelete({ slug }).lean<{
+    status?: string;
+  }>();
+  const result = { deletedCount: post ? 1 : 0 };
   if (result.deletedCount === 0)
     return NextResponse.json({ error: "News post not found." }, { status: 404 });
+
+  if (post?.status === "PUBLISHED") {
+    revalidatePath("/");
+    revalidatePath("/news");
+    revalidatePath(`/news/${slug}`);
+  }
+
   return NextResponse.json({ deleted: true });
 }
