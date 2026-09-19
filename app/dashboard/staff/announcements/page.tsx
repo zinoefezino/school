@@ -1,10 +1,34 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Megaphone01Icon } from "@hugeicons/core-free-icons";
-import { announcementsFor, audienceLabel } from "../../../../lib/announcements";
+import LoadingState from "../../components/LoadingState";
+import {
+  audienceLabel,
+  type AnnouncementAudience,
+} from "../../../../lib/announcements";
 
-const announcements = announcementsFor("STAFF");
+type Announcement = {
+  _id: string;
+  title: string;
+  body: string;
+  audiences: AnnouncementAudience[];
+  publishedAt: string;
+};
 
 export default function StaffAnnouncementsPage() {
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/announcements")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => setAnnouncements(data?.announcements ?? []))
+      .catch(() => setAnnouncements([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -16,9 +40,19 @@ export default function StaffAnnouncementsPage() {
         </h2>
       </div>
       <div className="flex flex-col gap-4">
-        {announcements.map((item) => (
+        {loading ? (
+          <LoadingState
+            label="Loading announcements..."
+            className="rounded-2xl bg-white p-6"
+          />
+        ) : announcements.length === 0 ? (
+          <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
+            No announcements yet.
+          </p>
+        ) : (
+          announcements.map((item) => (
           <article
-            key={item.title}
+            key={item._id}
             className="rounded-2xl border border-navy/10 bg-white p-6"
           >
             <div className="flex items-start gap-4">
@@ -31,7 +65,7 @@ export default function StaffAnnouncementsPage() {
                     {item.title}
                   </h3>
                   <span className="text-xs text-foreground/40">
-                    {item.date}
+                    {new Date(item.publishedAt).toLocaleDateString()}
                   </span>
                 </div>
                 <p className="mt-1.5 text-sm leading-6 text-foreground/70">
@@ -43,7 +77,8 @@ export default function StaffAnnouncementsPage() {
               </div>
             </div>
           </article>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

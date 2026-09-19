@@ -7,32 +7,54 @@ import {
   CheckmarkCircle02Icon,
   CancelCircleIcon,
 } from "@hugeicons/core-free-icons";
-import { children } from "../data";
+import LoadingState from "../../components/LoadingState";
 
-const demoRecords = [
-  { date: "Sep 18, 2026", subject: "Basic Science", status: "Present" },
-  { date: "Sep 17, 2026", subject: "Mathematics", status: "Present" },
-  { date: "Sep 16, 2026", subject: "English Language", status: "Absent" },
-];
+type ChildSummary = { id: string; name: string };
+type AttendanceRecord = { date: string; subject: string; status: string };
+
+function statusLabel(status: string) {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
 
 export default function ParentAttendancePage() {
-  const [selectedChild, setSelectedChild] = useState(children[0].id);
-  const [records, setRecords] = useState(demoRecords);
+  const [children, setChildren] = useState<ChildSummary[]>([]);
+  const [selectedChild, setSelectedChild] = useState("");
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [loadingChildren, setLoadingChildren] = useState(true);
+  const [loadingRecords, setLoadingRecords] = useState(false);
+
   useEffect(() => {
+    fetch("/api/parent/children")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const nextChildren = data?.children ?? [];
+        setChildren(nextChildren);
+        setSelectedChild(nextChildren[0]?.id ?? "");
+      })
+      .catch(() => setChildren([]))
+      .finally(() => setLoadingChildren(false));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedChild) return;
+    Promise.resolve().then(() => setLoadingRecords(true));
     fetch(`/api/parent/attendance?studentId=${selectedChild}`)
       .then(async (response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (data)
-          setRecords(
-            data.records.map((record: { date: string; status: string }) => ({
+        setRecords(
+          (data?.records ?? []).map(
+            (record: { date: string; status: string }) => ({
               date: new Date(record.date).toLocaleDateString(),
               subject: "School attendance",
               status: record.status,
-            })),
-          );
+            }),
+          ),
+        );
       })
-      .catch(() => undefined);
+      .catch(() => setRecords([]))
+      .finally(() => setLoadingRecords(false));
   }, [selectedChild]);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-end justify-between gap-4">
@@ -49,8 +71,11 @@ export default function ParentAttendancePage() {
           onChange={(event) => setSelectedChild(event.target.value)}
           className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm"
         >
-          <option value={children[0].id}>{children[0].name}</option>
-          <option value={children[1].id}>{children[1].name}</option>
+          {children.map((child) => (
+            <option key={child.id} value={child.id}>
+              {child.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="rounded-2xl border border-navy/10 bg-white p-5">
@@ -73,26 +98,52 @@ export default function ParentAttendancePage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {records.map((record) => (
-              <tr key={`${record.date}-${record.subject}`} className="text-sm">
-                <td className="px-6 py-4 text-foreground/70">{record.date}</td>
-                <td className="px-6 py-4 font-medium text-foreground">
-                  {record.subject}
-                </td>
-                <td
-                  className={`px-6 py-4 ${record.status === "Present" ? "text-[#3F7A5B]" : "text-[#B4483B]"}`}
-                >
-                  <span className="flex items-center gap-2">
-                    {record.status === "Present" ? (
-                      <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} />
-                    ) : (
-                      <HugeiconsIcon icon={CancelCircleIcon} size={16} />
-                    )}
-                    {record.status}
-                  </span>
+            {loadingChildren || loadingRecords ? (
+              <tr>
+                <td colSpan={3}>
+                  <LoadingState
+                    label="Loading attendance..."
+                    className="min-h-32"
+                  />
                 </td>
               </tr>
-            ))}
+            ) : records.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  No attendance records yet.
+                </td>
+              </tr>
+            ) : (
+              records.map((record) => (
+                <tr key={`${record.date}-${record.subject}`} className="text-sm">
+                  <td className="px-6 py-4 text-foreground/70">
+                    {record.date}
+                  </td>
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    {record.subject}
+                  </td>
+                  <td
+                    className={`px-6 py-4 ${
+                      record.status === "PRESENT"
+                        ? "text-[#3F7A5B]"
+                        : "text-[#B4483B]"
+                    }`}
+                  >
+                    <span className="flex items-center gap-2">
+                      {record.status === "PRESENT" ? (
+                        <HugeiconsIcon icon={CheckmarkCircle02Icon} size={16} />
+                      ) : (
+                        <HugeiconsIcon icon={CancelCircleIcon} size={16} />
+                      )}
+                      {statusLabel(record.status)}
+                    </span>
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

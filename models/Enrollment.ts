@@ -19,6 +19,9 @@ const enrollmentSchema = new Schema<IEnrollment>({
 });
 
 enrollmentSchema.index({ student: 1, term: 1 }, { unique: true });
+enrollmentSchema.index({ student: 1, status: 1 });
+enrollmentSchema.index({ classSection: 1, status: 1 });
+enrollmentSchema.index({ term: 1, status: 1 });
 
 export default models.Enrollment ||
   model<IEnrollment>("Enrollment", enrollmentSchema);

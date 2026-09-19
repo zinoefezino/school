@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft02Icon, CalendarCheckIcon } from "@hugeicons/core-free-icons";
+import LoadingState from "../../../components/LoadingState";
 
 type RecordRow = {
   student?: { fullName?: string; admissionNumber?: string };
@@ -62,7 +63,10 @@ export default function AttendanceDetailsPage() {
                   colSpan={4}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
-                  Loading attendance...
+                  <LoadingState
+                    label="Loading attendance..."
+                    className="min-h-24"
+                  />
                 </td>
               </tr>
             ) : records.length === 0 ? (

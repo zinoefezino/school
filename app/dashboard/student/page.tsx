@@ -13,7 +13,8 @@ import {
   Megaphone01Icon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
-import { getStudentAvatar } from "./data";
+import LoadingState from "../components/LoadingState";
+import StudentAvatar from "./components/StudentAvatar";
 
 type StudentOverview = {
   fullName: string;
@@ -50,9 +51,7 @@ export default function StudentDashboard() {
       .finally(() => setLoading(false));
   }, []);
   if (loading)
-    return (
-      <p className="text-sm text-foreground/60">Loading your dashboard...</p>
-    );
+    return <LoadingState label="Loading your dashboard..." />;
   if (!data)
     return (
       <div className="rounded-2xl border border-dashed border-navy/20 bg-white p-8 text-sm text-foreground/60">
@@ -60,10 +59,15 @@ export default function StudentDashboard() {
         administrator.
       </div>
     );
-  const age = Math.max(
-    0,
-    new Date().getFullYear() - new Date(data.dateOfBirth).getFullYear(),
-  );
+  const birthDate = new Date(data.dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+  if (!birthdayPassed) age -= 1;
+  age = Math.max(0, age);
   const details = [
     { label: "Student", value: data.fullName, icon: UserIcon },
     {
@@ -89,13 +93,10 @@ export default function StudentDashboard() {
     <div className="flex flex-col gap-8">
       <div className="rounded-2xl border border-navy/10 bg-white p-6">
         <div className="flex items-center gap-5">
-          <img
-            src={getStudentAvatar(
-              data.gender ?? "female",
-              data.admissionNumber,
-            )}
-            alt={`${data.fullName}'s avatar`}
-            className="h-16 w-16 rounded-full object-cover"
+          <StudentAvatar
+            gender={data.gender}
+            name={data.fullName}
+            size="md"
           />
           <div>
             <p className="text-sm text-foreground/50">Student profile</p>
@@ -160,7 +161,7 @@ export default function StudentDashboard() {
         <div className="rounded-2xl border border-navy/10 bg-white p-6 lg:col-span-2">
           <div className="flex items-center justify-between">
             <h2 className="text-base font-medium text-foreground">
-              Today's classes
+              Today&apos;s classes
             </h2>
             <a
               href="/dashboard/student/timetable"

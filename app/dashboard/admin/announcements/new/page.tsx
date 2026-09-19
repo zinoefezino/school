@@ -30,7 +30,8 @@ export default function NewAnnouncementPage() {
     event.preventDefault();
     setSubmitting(true);
     setStatus(null);
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
 
     try {
       const response = await fetch("/api/announcements", {
@@ -43,8 +44,9 @@ export default function NewAnnouncementPage() {
         }),
       });
       const result = await response.json();
-      if (!response.ok) throw new Error(result.error);
-      event.currentTarget.reset();
+      if (!response.ok)
+        throw new Error(result.error ?? "Unable to publish announcement.");
+      form.reset();
       setSelectedAudiences(["STUDENT"]);
       setStatus("Announcement published successfully.");
     } catch (error) {

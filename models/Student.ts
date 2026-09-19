@@ -25,4 +25,7 @@ const studentSchema = new Schema<IStudent>({
   guardian: { type: Schema.Types.ObjectId, ref: "Guardian" },
 });
 
+studentSchema.index({ fullName: 1 });
+studentSchema.index({ guardian: 1 });
+
 export default models.Student || model<IStudent>("Student", studentSchema);

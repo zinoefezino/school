@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Coins01Icon, Download01Icon } from "@hugeicons/core-free-icons";
+import LoadingState from "../../components/LoadingState";
 
 type Invoice = {
   _id: string;
@@ -91,7 +92,10 @@ export default function FeesPage() {
                   colSpan={5}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
-                  Loading invoices...
+                  <LoadingState
+                    label="Loading invoices..."
+                    className="min-h-24"
+                  />
                 </td>
               </tr>
             ) : invoices.length === 0 ? (

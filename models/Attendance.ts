@@ -17,6 +17,8 @@ const attendanceSchema = new Schema<IAttendance>({
 });
 
 attendanceSchema.index({ student: 1, date: 1 }, { unique: true });
+attendanceSchema.index({ student: 1, term: 1 });
+attendanceSchema.index({ term: 1, date: 1 });
 
 export default models.Attendance ||
   model<IAttendance>("Attendance", attendanceSchema);

@@ -1,13 +1,36 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   ArrowRight02Icon,
   CalendarCheckIcon,
   Certificate01Icon,
-  StudentsIcon,
 } from "@hugeicons/core-free-icons";
-import { children } from "../data";
+import LoadingState from "../../components/LoadingState";
+
+type ChildSummary = {
+  id: string;
+  name: string;
+  admissionNumber: string;
+  classSection: string;
+  attendance: string;
+  average: string;
+  avatar: string;
+};
 
 export default function ParentChildrenPage() {
+  const [children, setChildren] = useState<ChildSummary[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/parent/children")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => setChildren(data?.children ?? []))
+      .catch(() => setChildren([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -19,7 +42,17 @@ export default function ParentChildrenPage() {
         </h2>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {children.map((child) => (
+        {loading ? (
+          <LoadingState
+            label="Loading linked students..."
+            className="rounded-2xl bg-white p-6"
+          />
+        ) : children.length === 0 ? (
+          <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
+            No students are linked to your parent account yet.
+          </p>
+        ) : (
+          children.map((child) => (
           <article
             key={child.id}
             className="rounded-2xl border border-navy/10 bg-white p-6"
@@ -67,7 +100,8 @@ export default function ParentChildrenPage() {
               <HugeiconsIcon icon={ArrowRight02Icon} size={14} />
             </a>
           </article>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );

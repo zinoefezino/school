@@ -29,6 +29,21 @@ const navItems = [
   },
   { label: "Classes", href: "/dashboard/admin/classes", icon: Book02Icon },
   {
+    label: "Academics",
+    href: "/dashboard/admin/academics",
+    icon: Book02Icon,
+  },
+  {
+    label: "Assignments",
+    href: "/dashboard/admin/assignments",
+    icon: Book02Icon,
+  },
+  {
+    label: "Timetable",
+    href: "/dashboard/admin/timetable",
+    icon: Calendar03Icon,
+  },
+  {
     label: "Attendance",
     href: "/dashboard/admin/attendance",
     icon: Calendar03Icon,

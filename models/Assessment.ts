@@ -22,6 +22,8 @@ assessmentSchema.index(
   { student: 1, subject: 1, term: 1, scoreType: 1 },
   { unique: true },
 );
+assessmentSchema.index({ student: 1, term: 1 });
+assessmentSchema.index({ subject: 1, term: 1 });
 
 export default models.Assessment ||
   model<IAssessment>("Assessment", assessmentSchema);

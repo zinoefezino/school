@@ -29,7 +29,8 @@ export default function AccountForm({ role }: { role: AccountRole }) {
     setSubmitting(true);
     setError("");
     setSuccess("");
-    const formData = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const formData = new FormData(form);
     const payload = Object.fromEntries(formData.entries());
     try {
       const response = await fetch("/api/admin/accounts", {
@@ -43,7 +44,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
       setSuccess(
         "Account created. Give the user their temporary password securely.",
       );
-      event.currentTarget.reset();
+      form.reset();
       setTimeout(
         () =>
           router.push(

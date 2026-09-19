@@ -3,41 +3,58 @@
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Certificate01Icon } from "@hugeicons/core-free-icons";
-import { children } from "../data";
+import LoadingState from "../../components/LoadingState";
 
+type ChildSummary = { id: string; name: string };
 type Result = { name: string; score: number; grade: string };
-const demoResults: Result[] = [
-  { name: "Mathematics", score: 86, grade: "A" },
-  { name: "English Language", score: 78, grade: "B" },
-  { name: "Basic Science", score: 82, grade: "A" },
-  { name: "Social Studies", score: 74, grade: "B" },
-];
+
+function gradeFor(score: number) {
+  if (score >= 80) return "A";
+  if (score >= 70) return "B";
+  if (score >= 60) return "C";
+  if (score >= 50) return "D";
+  return "F";
+}
 
 export default function ParentResultsPage() {
-  const [selectedChild, setSelectedChild] = useState(children[0].id);
-  const [results, setResults] = useState(demoResults);
+  const [children, setChildren] = useState<ChildSummary[]>([]);
+  const [selectedChild, setSelectedChild] = useState("");
+  const [results, setResults] = useState<Result[]>([]);
+  const [loadingChildren, setLoadingChildren] = useState(true);
+  const [loadingResults, setLoadingResults] = useState(false);
+
   useEffect(() => {
+    fetch("/api/parent/children")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const nextChildren = data?.children ?? [];
+        setChildren(nextChildren);
+        setSelectedChild(nextChildren[0]?.id ?? "");
+      })
+      .catch(() => setChildren([]))
+      .finally(() => setLoadingChildren(false));
+  }, []);
+
+  useEffect(() => {
+    if (!selectedChild) return;
+    Promise.resolve().then(() => setLoadingResults(true));
     fetch(`/api/parent/results?studentId=${selectedChild}`)
       .then(async (response) => (response.ok ? response.json() : null))
       .then((data) => {
-        if (data)
-          setResults(
-            data.assessments.map(
-              (assessment: { subject?: { name?: string }; score: number }) => ({
-                name: assessment.subject?.name ?? "Subject",
-                score: assessment.score,
-                grade:
-                  assessment.score >= 80
-                    ? "A"
-                    : assessment.score >= 70
-                      ? "B"
-                      : "C",
-              }),
-            ),
-          );
+        setResults(
+          (data?.assessments ?? []).map(
+            (assessment: { subject?: { name?: string }; score: number }) => ({
+              name: assessment.subject?.name ?? "Subject",
+              score: assessment.score,
+              grade: gradeFor(assessment.score),
+            }),
+          ),
+        );
       })
-      .catch(() => undefined);
+      .catch(() => setResults([]))
+      .finally(() => setLoadingResults(false));
   }, [selectedChild]);
+
   return (
     <div className="flex flex-col gap-6">
       <div>
@@ -52,13 +69,11 @@ export default function ParentResultsPage() {
           onChange={(event) => setSelectedChild(event.target.value)}
           className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm"
         >
-          <option value={children[0].id}>{children[0].name}</option>
-          <option value={children[1].id}>{children[1].name}</option>
-        </select>
-        <select className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm">
-          <option>First Term · 2026/2027</option>
-          <option>Second Term · 2026/2027</option>
-          <option>Third Term · 2026/2027</option>
+          {children.map((child) => (
+            <option key={child.id} value={child.id}>
+              {child.name}
+            </option>
+          ))}
         </select>
       </div>
       <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
@@ -71,26 +86,46 @@ export default function ParentResultsPage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {results.map((subject) => (
-              <tr key={subject.name} className="text-sm">
-                <td className="px-6 py-4 font-medium text-foreground">
-                  <span className="flex items-center gap-2">
-                    <HugeiconsIcon
-                      icon={Certificate01Icon}
-                      size={17}
-                      className="text-blue"
-                    />
-                    {subject.name}
-                  </span>
-                </td>
-                <td className="px-6 py-4 text-foreground/70">
-                  {subject.score}%
-                </td>
-                <td className="px-6 py-4 font-medium text-foreground">
-                  {subject.grade}
+            {loadingChildren || loadingResults ? (
+              <tr>
+                <td colSpan={3}>
+                  <LoadingState
+                    label="Loading results..."
+                    className="min-h-32"
+                  />
                 </td>
               </tr>
-            ))}
+            ) : results.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  No published results yet.
+                </td>
+              </tr>
+            ) : (
+              results.map((subject) => (
+                <tr key={subject.name} className="text-sm">
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    <span className="flex items-center gap-2">
+                      <HugeiconsIcon
+                        icon={Certificate01Icon}
+                        size={17}
+                        className="text-blue"
+                      />
+                      {subject.name}
+                    </span>
+                  </td>
+                  <td className="px-6 py-4 text-foreground/70">
+                    {subject.score}%
+                  </td>
+                  <td className="px-6 py-4 font-medium text-foreground">
+                    {subject.grade}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
         </table>
       </div>

@@ -1,56 +1,49 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Certificate01Icon, TrendingUpIcon } from "@hugeicons/core-free-icons";
-
-type TermName = "First Term" | "Second Term" | "Third Term";
+import LoadingState from "../../components/LoadingState";
 
 type Result = {
   subject: string;
   score: number;
   grade: string;
 };
-
-const sessions = ["2026/2027", "2025/2026"];
-const terms: TermName[] = ["First Term", "Second Term", "Third Term"];
-
-const resultsByPeriod: Record<string, Result[]> = {
-  "2026/2027|First Term": [
-    { subject: "Mathematics", score: 86, grade: "A" },
-    { subject: "English Language", score: 78, grade: "B" },
-    { subject: "Basic Science", score: 82, grade: "A" },
-    { subject: "Social Studies", score: 74, grade: "B" },
-    { subject: "Computer Studies", score: 91, grade: "A" },
-  ],
-  "2026/2027|Second Term": [
-    { subject: "Mathematics", score: 89, grade: "A" },
-    { subject: "English Language", score: 81, grade: "A" },
-    { subject: "Basic Science", score: 84, grade: "A" },
-    { subject: "Social Studies", score: 79, grade: "B" },
-    { subject: "Computer Studies", score: 93, grade: "A" },
-  ],
-  "2026/2027|Third Term": [
-    { subject: "Mathematics", score: 92, grade: "A" },
-    { subject: "English Language", score: 84, grade: "A" },
-    { subject: "Basic Science", score: 88, grade: "A" },
-    { subject: "Social Studies", score: 81, grade: "A" },
-    { subject: "Computer Studies", score: 95, grade: "A" },
-  ],
-  "2025/2026|Third Term": [
-    { subject: "Mathematics", score: 80, grade: "A" },
-    { subject: "English Language", score: 73, grade: "B" },
-    { subject: "Basic Science", score: 78, grade: "B" },
-    { subject: "Social Studies", score: 76, grade: "B" },
-    { subject: "Computer Studies", score: 87, grade: "A" },
-  ],
+type ResultPeriod = {
+  termId: string;
+  term: string;
+  session: string;
+  results: Result[];
 };
 
 export default function ResultsPage() {
-  const [session, setSession] = useState(sessions[0]);
-  const [term, setTerm] = useState<TermName>(terms[0]);
-  const resultKey = `${session}|${term}`;
-  const results = resultsByPeriod[resultKey] ?? [];
+  const [periods, setPeriods] = useState<ResultPeriod[]>([]);
+  const [selectedTermId, setSelectedTermId] = useState("");
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/student/results")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        const nextPeriods = data?.periods ?? [];
+        setPeriods(nextPeriods);
+        setSelectedTermId(nextPeriods[0]?.termId ?? "");
+      })
+      .catch(() => setPeriods([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const selectedPeriod =
+    periods.find((period) => period.termId === selectedTermId) ?? periods[0];
+  const sessionOptions = useMemo(
+    () => [...new Set(periods.map((period) => period.session).filter(Boolean))],
+    [periods],
+  );
+  const termOptions = periods.filter(
+    (period) => period.session === (selectedPeriod?.session ?? ""),
+  );
+  const results = selectedPeriod?.results ?? [];
   const average = results.length
     ? (
         results.reduce((total, result) => total + result.score, 0) /
@@ -73,11 +66,16 @@ export default function ResultsPage() {
           <label className="flex flex-col gap-1 text-xs text-foreground/50">
             Session
             <select
-              value={session}
-              onChange={(event) => setSession(event.target.value)}
+              value={selectedPeriod?.session ?? ""}
+              onChange={(event) => {
+                const nextPeriod = periods.find(
+                  (period) => period.session === event.target.value,
+                );
+                setSelectedTermId(nextPeriod?.termId ?? "");
+              }}
               className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-blue"
             >
-              {sessions.map((option) => (
+              {sessionOptions.map((option) => (
                 <option key={option}>{option}</option>
               ))}
             </select>
@@ -85,12 +83,14 @@ export default function ResultsPage() {
           <label className="flex flex-col gap-1 text-xs text-foreground/50">
             Term
             <select
-              value={term}
-              onChange={(event) => setTerm(event.target.value as TermName)}
+              value={selectedTermId}
+              onChange={(event) => setSelectedTermId(event.target.value)}
               className="rounded-full border border-black/10 bg-white px-4 py-2.5 text-sm text-foreground outline-none focus:border-blue"
             >
-              {terms.map((option) => (
-                <option key={option}>{option}</option>
+              {termOptions.map((option) => (
+                <option key={option.termId} value={option.termId}>
+                  {option.term}
+                </option>
               ))}
             </select>
           </label>
@@ -99,8 +99,12 @@ export default function ResultsPage() {
 
       <div className="flex items-center justify-between rounded-2xl border border-navy/10 bg-white px-5 py-4">
         <div>
-          <p className="text-sm font-medium text-foreground">{term}</p>
-          <p className="mt-1 text-xs text-foreground/50">{session} session</p>
+          <p className="text-sm font-medium text-foreground">
+            {selectedPeriod?.term ?? "No published term"}
+          </p>
+          <p className="mt-1 text-xs text-foreground/50">
+            {selectedPeriod?.session ?? ""} session
+          </p>
         </div>
         <div className="flex items-center gap-2 text-sm">
           <HugeiconsIcon
@@ -113,7 +117,12 @@ export default function ResultsPage() {
         </div>
       </div>
 
-      {results.length > 0 ? (
+      {loading ? (
+        <LoadingState
+          label="Loading results..."
+          className="rounded-2xl border border-dashed border-navy/20 bg-white p-8"
+        />
+      ) : results.length > 0 ? (
         <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
           <table className="w-full text-left">
             <thead>
@@ -147,7 +156,7 @@ export default function ResultsPage() {
                     <div className="h-2 w-32 overflow-hidden rounded-full bg-blue-light">
                       <div
                         className="h-full rounded-full bg-blue"
-                        style={{ width: `${result.score}%` }}
+                        style={{ width: `${Math.min(result.score, 100)}%` }}
                       />
                     </div>
                   </td>

@@ -9,6 +9,7 @@ import {
   CalendarCheckIcon,
   StudentsIcon,
 } from "@hugeicons/core-free-icons";
+import LoadingState from "../components/LoadingState";
 
 type StaffClass = { classSection: string; studentCount: number };
 type Attention = {
@@ -66,9 +67,10 @@ export default function StaffOverview() {
           My assigned classes
         </h2>
         {loading ? (
-          <p className="mt-4 text-sm text-foreground/60">
-            Loading assigned classes...
-          </p>
+          <LoadingState
+            label="Loading assigned classes..."
+            className="mt-4 rounded-xl bg-white"
+          />
         ) : classes.length === 0 ? (
           <p className="mt-4 rounded-xl bg-white p-5 text-sm text-foreground/60">
             No classes have been assigned to you yet. An administrator can

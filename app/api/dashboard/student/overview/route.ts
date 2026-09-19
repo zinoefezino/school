@@ -52,6 +52,11 @@ export async function GET() {
     : [];
   return NextResponse.json({
     student,
+    fullName: student.fullName,
+    admissionNumber: student.admissionNumber,
+    dateOfBirth: student.dateOfBirth,
+    gender: student.gender,
+    photoUrl: student.photoUrl,
     enrollment,
     term,
     attendance: totalAttendance

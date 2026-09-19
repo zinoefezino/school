@@ -1,18 +1,52 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   CalendarCheckIcon,
   CheckmarkCircle02Icon,
   CancelCircleIcon,
 } from "@hugeicons/core-free-icons";
+import LoadingState from "../../components/LoadingState";
 
-const attendance = [
-  { date: "Sep 18, 2026", subject: "Basic Science", status: "Present" },
-  { date: "Sep 17, 2026", subject: "Mathematics", status: "Present" },
-  { date: "Sep 16, 2026", subject: "English Language", status: "Absent" },
-  { date: "Sep 15, 2026", subject: "Social Studies", status: "Present" },
-];
+type AttendanceRecord = {
+  _id: string;
+  date: string;
+  status: "PRESENT" | "ABSENT" | "LATE";
+  term?: { name?: string };
+};
+type AttendanceSummary = {
+  total: number;
+  present: number;
+  absent: number;
+  rate: number;
+};
+
+function statusLabel(status: AttendanceRecord["status"]) {
+  return status.charAt(0) + status.slice(1).toLowerCase();
+}
 
 export default function AttendancePage() {
+  const [records, setRecords] = useState<AttendanceRecord[]>([]);
+  const [summary, setSummary] = useState<AttendanceSummary>({
+    total: 0,
+    present: 0,
+    absent: 0,
+    rate: 0,
+  });
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/student/attendance")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        setRecords(data?.records ?? []);
+        if (data?.summary) setSummary(data.summary);
+      })
+      .catch(() => setRecords([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <div className="grid gap-4 sm:grid-cols-3">
@@ -22,7 +56,9 @@ export default function AttendancePage() {
             size={22}
             className="text-blue"
           />
-          <p className="mt-3 text-2xl font-medium text-foreground">94%</p>
+          <p className="mt-3 text-2xl font-medium text-foreground">
+            {summary.rate}%
+          </p>
           <p className="mt-1 text-sm text-foreground/60">
             Attendance this term
           </p>
@@ -33,7 +69,9 @@ export default function AttendancePage() {
             size={22}
             className="text-[#3F7A5B]"
           />
-          <p className="mt-3 text-2xl font-medium text-foreground">47</p>
+          <p className="mt-3 text-2xl font-medium text-foreground">
+            {summary.present}
+          </p>
           <p className="mt-1 text-sm text-foreground/60">Days present</p>
         </div>
         <div className="rounded-2xl border border-navy/10 bg-white p-5">
@@ -42,7 +80,9 @@ export default function AttendancePage() {
             size={22}
             className="text-[#B4483B]"
           />
-          <p className="mt-3 text-2xl font-medium text-foreground">3</p>
+          <p className="mt-3 text-2xl font-medium text-foreground">
+            {summary.absent}
+          </p>
           <p className="mt-1 text-sm text-foreground/60">Days absent</p>
         </div>
       </div>
@@ -62,25 +102,47 @@ export default function AttendancePage() {
             </tr>
           </thead>
           <tbody className="divide-y divide-black/5">
-            {attendance.map((item) => (
-              <tr key={`${item.date}-${item.subject}`} className="text-sm">
-                <td className="px-6 py-4 text-foreground/70">{item.date}</td>
+            {loading ? (
+              <tr>
+                <td colSpan={3}>
+                  <LoadingState
+                    label="Loading attendance..."
+                    className="min-h-32"
+                  />
+                </td>
+              </tr>
+            ) : records.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="p-8 text-center text-sm text-foreground/60"
+                >
+                  No attendance records yet.
+                </td>
+              </tr>
+            ) : (
+              records.map((item) => (
+              <tr key={item._id} className="text-sm">
+                <td className="px-6 py-4 text-foreground/70">
+                  {new Date(item.date).toLocaleDateString()}
+                </td>
                 <td className="px-6 py-4 font-medium text-foreground">
-                  {item.subject}
+                  {item.term?.name ?? "School day"}
                 </td>
                 <td className="px-6 py-4">
                   <span
                     className={
-                      item.status === "Present"
+                      item.status === "PRESENT"
                         ? "text-[#3F7A5B]"
                         : "text-[#B4483B]"
                     }
                   >
-                    {item.status}
+                    {statusLabel(item.status)}
                   </span>
                 </td>
               </tr>
-            ))}
+              ))
+            )}
           </tbody>
         </table>
       </div>

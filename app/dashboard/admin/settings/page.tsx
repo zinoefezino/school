@@ -7,6 +7,7 @@ import {
   LockPasswordIcon,
   Notification01Icon,
 } from "@hugeicons/core-free-icons";
+import LoadingState from "../../components/LoadingState";
 
 type Settings = {
   schoolName: string;
@@ -70,8 +71,7 @@ export default function SettingsPage() {
     }
   }
 
-  if (loading)
-    return <p className="text-sm text-foreground/60">Loading settings...</p>;
+  if (loading) return <LoadingState label="Loading settings..." />;
   return (
     <div className="flex max-w-3xl flex-col gap-6">
       <div>

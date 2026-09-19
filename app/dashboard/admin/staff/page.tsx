@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { UserAdd01Icon, Search01Icon } from "@hugeicons/core-free-icons";
 import ActionMenu from "../components/ActionMenu";
+import LoadingState from "../../components/LoadingState";
 
 type Staff = {
   _id: string;
@@ -80,7 +81,7 @@ export default function StaffPage() {
                   colSpan={5}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
-                  Loading staff...
+                  <LoadingState label="Loading staff..." className="min-h-24" />
                 </td>
               </tr>
             ) : staff.length === 0 ? (

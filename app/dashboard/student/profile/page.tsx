@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Book02Icon,
@@ -6,36 +9,86 @@ import {
   CalendarCheckIcon,
   UserIcon,
 } from "@hugeicons/core-free-icons";
-import { getAge, getStudentAvatar, student, term } from "../data";
+import LoadingState from "../../components/LoadingState";
+import StudentAvatar from "../components/StudentAvatar";
 
-const details = [
-  { label: "Student", value: student.fullName, icon: UserIcon },
-  { label: "Class", value: student.classSection, icon: Book02Icon },
-  { label: "Term", value: term.name, icon: Calendar03Icon },
-  { label: "Session", value: term.session, icon: CalendarCheckIcon },
-  {
-    label: "Age",
-    value: `${getAge(student.dateOfBirth)} years`,
-    icon: CakeIcon,
-  },
-];
+type StudentOverview = {
+  fullName: string;
+  admissionNumber: string;
+  dateOfBirth: string;
+  gender?: "male" | "female";
+  term?: { name?: string; session?: { name?: string } };
+  enrollment?: {
+    classSection?: { name?: string; classLevel?: { name?: string } };
+  };
+};
+
+function getAge(dateOfBirth: string) {
+  const birthDate = new Date(dateOfBirth);
+  const today = new Date();
+  let age = today.getFullYear() - birthDate.getFullYear();
+  const birthdayPassed =
+    today.getMonth() > birthDate.getMonth() ||
+    (today.getMonth() === birthDate.getMonth() &&
+      today.getDate() >= birthDate.getDate());
+  if (!birthdayPassed) age -= 1;
+  return Math.max(0, age);
+}
 
 export default function ProfilePage() {
+  const [data, setData] = useState<StudentOverview | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/student/overview")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((overview) => setData(overview))
+      .catch(() => setData(null))
+      .finally(() => setLoading(false));
+  }, []);
+
+  if (loading) return <LoadingState label="Loading profile..." />;
+
+  if (!data)
+    return (
+      <div className="rounded-2xl border border-dashed border-navy/20 bg-white p-8 text-sm text-foreground/60">
+        Your student profile is not available yet. Please contact the school
+        administrator.
+      </div>
+    );
+
+  const className = data.enrollment?.classSection
+    ? `${data.enrollment.classSection.classLevel?.name ?? ""} ${
+        data.enrollment.classSection.name ?? ""
+      }`.trim()
+    : "Not assigned";
+  const details = [
+    { label: "Student", value: data.fullName, icon: UserIcon },
+    { label: "Class", value: className, icon: Book02Icon },
+    { label: "Term", value: data.term?.name ?? "Not published", icon: Calendar03Icon },
+    {
+      label: "Session",
+      value: data.term?.session?.name ?? "Not published",
+      icon: CalendarCheckIcon,
+    },
+    {
+      label: "Age",
+      value: `${getAge(data.dateOfBirth)} years`,
+      icon: CakeIcon,
+    },
+  ];
+
   return (
     <div className="max-w-4xl rounded-2xl border border-navy/10 bg-white p-6 sm:p-8">
       <div className="flex items-center gap-5 border-b border-black/5 pb-6">
-        <img
-          src={getStudentAvatar(student.gender, student.admissionNumber)}
-          alt={`${student.fullName}'s avatar`}
-          className="h-20 w-20 rounded-full object-cover"
-        />
+        <StudentAvatar gender={data.gender} name={data.fullName} size="lg" />
         <div>
           <p className="text-sm text-foreground/50">Student profile</p>
           <h2 className="mt-1 text-xl font-medium text-foreground">
-            {student.fullName}
+            {data.fullName}
           </h2>
           <p className="mt-1 text-sm text-foreground/60">
-            Admission no. {student.admissionNumber}
+            Admission no. {data.admissionNumber}
           </p>
         </div>
       </div>

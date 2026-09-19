@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Add01Icon, StudentsIcon } from "@hugeicons/core-free-icons";
 import ActionMenu from "../components/ActionMenu";
+import LoadingState from "../../components/LoadingState";
 
 type ClassRow = {
   _id: string;
@@ -36,7 +37,7 @@ export default function ClassesPage() {
         </a>
       </div>
       {loading ? (
-        <p className="text-sm text-foreground/60">Loading classes...</p>
+        <LoadingState label="Loading classes..." />
       ) : classes.length === 0 ? (
         <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
           No classes have been created yet.

@@ -4,6 +4,7 @@ import {
   unauthorizedParentResponse,
 } from "../../../../lib/parent-access";
 import Invoice from "../../../../models/Invoice";
+import Payment from "../../../../models/Payment";
 
 export async function GET(request: Request) {
   try {
@@ -16,7 +17,17 @@ export async function GET(request: Request) {
       .populate("term", "name session")
       .sort({ dueDate: -1 })
       .lean();
-    return NextResponse.json({ invoices });
+    const payments = await Payment.find({
+      invoice: { $in: invoices.map((invoice) => invoice._id) },
+    })
+      .populate({
+        path: "invoice",
+        select: "student",
+        populate: { path: "student", select: "fullName admissionNumber" },
+      })
+      .sort({ paidAt: -1 })
+      .lean();
+    return NextResponse.json({ invoices, payments });
   } catch {
     return NextResponse.json(
       { error: "Unable to load fees." },

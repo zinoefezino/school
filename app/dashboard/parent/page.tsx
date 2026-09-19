@@ -11,7 +11,7 @@ import {
   StudentsIcon,
   Alert02Icon,
 } from "@hugeicons/core-free-icons";
-import { children, formatNaira, parent, parentAnnouncements } from "./data";
+import LoadingState from "../components/LoadingState";
 
 type ParentAnnouncement = {
   title: string;
@@ -19,42 +19,80 @@ type ParentAnnouncement = {
   publishedAt?: string;
   body: string;
 };
+type ParentProfile = { fullName: string; email: string };
+type ChildSummary = {
+  id: string;
+  name: string;
+  admissionNumber: string;
+  classSection: string;
+  attendance: string;
+  average: string;
+  balance: number;
+  dueDate: string;
+  avatar: string;
+};
+
+function formatNaira(amount: number) {
+  return `₦${amount.toLocaleString("en-NG")}`;
+}
 
 export default function ParentDashboard() {
-  const [selectedChildId, setSelectedChildId] = useState(children[0].id);
+  const [parent, setParent] = useState<ParentProfile | null>(null);
+  const [children, setChildren] = useState<ChildSummary[]>([]);
+  const [selectedChildId, setSelectedChildId] = useState("");
   const [visibleAnnouncements, setVisibleAnnouncements] =
-    useState<ParentAnnouncement[]>(parentAnnouncements);
+    useState<ParentAnnouncement[]>([]);
   const [overdueCount, setOverdueCount] = useState(0);
   const [newResultsCount, setNewResultsCount] = useState(0);
+  const [loading, setLoading] = useState(true);
   const child =
     children.find((item) => item.id === selectedChildId) ?? children[0];
 
   useEffect(() => {
-    fetch("/api/parent/notifications")
-      .then(async (response) => {
-        if (!response.ok) return null;
-        return response.json();
-      })
-      .then((data) => {
-        if (!data) return;
+    Promise.all([
+      fetch("/api/parent/children").then(async (response) =>
+        response.ok ? response.json() : null,
+      ),
+      fetch("/api/parent/notifications").then(async (response) =>
+        response.ok ? response.json() : null,
+      ),
+    ])
+      .then(([childrenData, notificationData]) => {
+        if (childrenData) {
+          setParent(childrenData.parent);
+          setChildren(childrenData.children ?? []);
+          setSelectedChildId(childrenData.children?.[0]?.id ?? "");
+        }
+        if (!notificationData) return;
         setVisibleAnnouncements(
-          data.announcements.map((item: ParentAnnouncement) => ({
+          notificationData.announcements.map((item: ParentAnnouncement) => ({
             ...item,
             date: item.publishedAt,
           })),
         );
-        setOverdueCount(data.outstandingInvoices.length);
-        setNewResultsCount(data.publishedTerms.length);
+        setOverdueCount(notificationData.outstandingInvoices.length);
+        setNewResultsCount(notificationData.publishedTerms.length);
       })
-      .catch(() => undefined);
+      .catch(() => undefined)
+      .finally(() => setLoading(false));
   }, []);
+
+  if (loading)
+    return <LoadingState label="Loading family dashboard..." />;
+
+  if (!child)
+    return (
+      <div className="rounded-2xl border border-dashed border-navy/20 bg-white p-8 text-sm text-foreground/60">
+        No students are linked to your parent account yet.
+      </div>
+    );
 
   return (
     <div className="flex flex-col gap-8">
       <div className="flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="text-sm text-foreground/60">
-            Welcome back, {parent.fullName}
+            Welcome back, {parent?.fullName ?? "Parent"}
           </p>
           <h2 className="mt-1 text-xl font-medium text-foreground">
             Family overview
@@ -219,7 +257,8 @@ export default function ParentDashboard() {
               Family account
             </h2>
             <p className="mt-1 text-sm text-foreground/60">
-              Your dashboard can show every child linked to {parent.email}.
+              Your dashboard can show every child linked to{" "}
+              {parent?.email || "your account"}.
               Select a child above to review their school activity.
             </p>
           </div>

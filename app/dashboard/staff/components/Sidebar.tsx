@@ -27,6 +27,16 @@ const navItems = [
     icon: Calendar03Icon,
   },
   {
+    label: "Timetable",
+    href: "/dashboard/staff/timetable",
+    icon: Calendar03Icon,
+  },
+  {
+    label: "Assignments",
+    href: "/dashboard/staff/assignments",
+    icon: Book02Icon,
+  },
+  {
     label: "Results",
     href: "/dashboard/staff/results",
     icon: Certificate01Icon,
@@ -52,12 +62,14 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
   useEffect(() => {
-    const hasReadAnnouncements =
-      window.localStorage.getItem(announcementReadStorageKey("STAFF")) ===
-      "true";
-    setUnreadAnnouncements(
-      hasReadAnnouncements ? 0 : unreadAnnouncementsFor("STAFF"),
-    );
+    Promise.resolve().then(() => {
+      const hasReadAnnouncements =
+        window.localStorage.getItem(announcementReadStorageKey("STAFF")) ===
+        "true";
+      setUnreadAnnouncements(
+        hasReadAnnouncements ? 0 : unreadAnnouncementsFor("STAFF"),
+      );
+    });
   }, [pathname]);
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);

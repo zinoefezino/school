@@ -2,11 +2,16 @@
 
 import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Add01Icon, Megaphone01Icon } from "@hugeicons/core-free-icons";
+import {
+  Add01Icon,
+  Delete02Icon,
+  Megaphone01Icon,
+} from "@hugeicons/core-free-icons";
 import {
   audienceLabel,
   type AnnouncementAudience,
 } from "../../../../lib/announcements";
+import LoadingState from "../../components/LoadingState";
 
 type Announcement = {
   _id: string;
@@ -20,12 +25,43 @@ export default function AdminAnnouncementsPage() {
   const [items, setItems] = useState<Announcement[]>([]);
   const [filter, setFilter] = useState<Filter>("ALL");
   const [loading, setLoading] = useState(true);
+  const [deletingId, setDeletingId] = useState("");
+  const [status, setStatus] = useState("");
   useEffect(() => {
     fetch("/api/announcements")
       .then((response) => response.json())
       .then((data) => setItems(data.announcements ?? []))
       .finally(() => setLoading(false));
   }, []);
+  const deleteAnnouncement = async (id: string) => {
+    const item = items.find((announcement) => announcement._id === id);
+    const confirmed = window.confirm(
+      `Delete "${item?.title ?? "this announcement"}"? This will remove it from all dashboards.`,
+    );
+    if (!confirmed) return;
+    setDeletingId(id);
+    setStatus("");
+    try {
+      const response = await fetch(`/api/announcements/${id}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+      if (!response.ok)
+        throw new Error(result.error ?? "Unable to delete announcement.");
+      setItems((current) =>
+        current.filter((announcement) => announcement._id !== id),
+      );
+      setStatus("Announcement deleted.");
+    } catch (error) {
+      setStatus(
+        error instanceof Error
+          ? error.message
+          : "Unable to delete announcement.",
+      );
+    } finally {
+      setDeletingId("");
+    }
+  };
   const visible =
     filter === "ALL"
       ? items
@@ -66,11 +102,17 @@ export default function AdminAnnouncementsPage() {
           </button>
         ))}
       </div>
+      {status && (
+        <p className="rounded-2xl border border-blue/20 bg-blue/5 px-4 py-3 text-sm text-foreground/70">
+          {status}
+        </p>
+      )}
       <div className="flex flex-col gap-4">
         {loading ? (
-          <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
-            Loading announcements...
-          </p>
+          <LoadingState
+            label="Loading announcements..."
+            className="rounded-2xl bg-white p-6"
+          />
         ) : visible.length === 0 ? (
           <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
             No announcements found.
@@ -85,7 +127,7 @@ export default function AdminAnnouncementsPage() {
                 <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-light text-blue">
                   <HugeiconsIcon icon={Megaphone01Icon} size={20} />
                 </span>
-                <div>
+                <div className="min-w-0 flex-1">
                   <div className="flex flex-wrap items-center gap-3">
                     <h3 className="text-base font-medium text-foreground">
                       {item.title}
@@ -101,6 +143,15 @@ export default function AdminAnnouncementsPage() {
                     {audienceLabel(item.audiences)}
                   </span>
                 </div>
+                <button
+                  type="button"
+                  disabled={deletingId === item._id}
+                  onClick={() => deleteAnnouncement(item._id)}
+                  className="flex shrink-0 items-center gap-1.5 rounded-full border border-[#B4483B]/20 px-3 py-2 text-xs font-medium text-[#B4483B] hover:bg-[#B4483B]/5 disabled:cursor-not-allowed disabled:opacity-40"
+                >
+                  <HugeiconsIcon icon={Delete02Icon} size={15} />
+                  {deletingId === item._id ? "Deleting..." : "Delete"}
+                </button>
               </div>
             </article>
           ))

@@ -28,4 +28,8 @@ const invoiceSchema = new Schema<IInvoice>({
   },
 });
 
+invoiceSchema.index({ student: 1 });
+invoiceSchema.index({ classSection: 1, term: 1 });
+invoiceSchema.index({ status: 1, dueDate: 1 });
+
 export default models.Invoice || model<IInvoice>("Invoice", invoiceSchema);

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Menu01Icon, Search01Icon } from "@hugeicons/core-free-icons";
@@ -10,6 +11,9 @@ const titles: Record<string, string> = {
   "/dashboard/admin/staff": "Staff",
   "/dashboard/admin/parents/new": "Add parent",
   "/dashboard/admin/classes": "Classes",
+  "/dashboard/admin/academics": "Academics",
+  "/dashboard/admin/assignments": "Assignments",
+  "/dashboard/admin/timetable": "Timetable",
   "/dashboard/admin/attendance": "Attendance",
   "/dashboard/admin/fees": "Fees",
   "/dashboard/admin/announcements": "Announcements",
@@ -19,10 +23,19 @@ const titles: Record<string, string> = {
 interface TopbarProps {
   onMenuClick: () => void;
 }
+type CurrentUser = { displayName: string; initials: string };
 
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const pathname = usePathname();
   const title = titles[pathname] ?? "Dashboard";
+  const [user, setUser] = useState<CurrentUser | null>(null);
+
+  useEffect(() => {
+    fetch("/api/dashboard/me")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => setUser(data?.user ?? null))
+      .catch(() => setUser(null));
+  }, []);
 
   return (
     <header className="flex items-center justify-between border-b border-black/5 bg-white px-6 py-4">
@@ -53,10 +66,10 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
 
         <div className="flex items-center gap-2.5">
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-sm font-medium text-navy">
-            A
+            {user?.initials ?? "A"}
           </span>
           <span className="hidden text-sm font-medium text-foreground sm:block">
-            Admin
+            {user?.displayName ?? "Admin"}
           </span>
         </div>
       </div>

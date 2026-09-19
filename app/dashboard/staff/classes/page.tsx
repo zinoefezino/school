@@ -1,3 +1,6 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Book02Icon,
@@ -5,21 +8,51 @@ import {
   Certificate01Icon,
   StudentsIcon,
 } from "@hugeicons/core-free-icons";
-import { assignedClasses } from "../data";
+import LoadingState from "../../components/LoadingState";
+
+type AssignedClass = {
+  id: string;
+  classSection: string;
+  studentCount: number;
+  isClassTeacher: boolean;
+  subjects?: { id: string; name: string }[];
+  resultStatus: string;
+};
 
 export default function StaffClassesPage() {
+  const [assignedClasses, setAssignedClasses] = useState<AssignedClass[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/staff/classes")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => setAssignedClasses(data?.classes ?? []))
+      .catch(() => setAssignedClasses([]))
+      .finally(() => setLoading(false));
+  }, []);
+
   return (
     <div className="flex flex-col gap-6">
       <div>
         <p className="text-sm text-foreground/60">
-          Classes assigned to you by the school administrator
+          Classes where you are the class head or assigned subject teacher
         </p>
         <h2 className="mt-1 text-xl font-medium text-foreground">My classes</h2>
       </div>
       <div className="grid gap-4 sm:grid-cols-2">
-        {assignedClasses.map((item) => (
+        {loading ? (
+          <LoadingState
+            label="Loading assigned classes..."
+            className="rounded-2xl bg-white p-6"
+          />
+        ) : assignedClasses.length === 0 ? (
+          <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
+            No classes have been assigned to you yet.
+          </p>
+        ) : (
+          assignedClasses.map((item) => (
           <article
-            key={item.classSection}
+            key={item.id}
             className="rounded-2xl border border-navy/10 bg-white p-6"
           >
             <div className="flex items-start justify-between gap-4">
@@ -30,12 +63,14 @@ export default function StaffClassesPage() {
                   </h3>
                   {item.isClassTeacher && (
                     <span className="rounded-full bg-blue-light px-2.5 py-1 text-xs font-medium text-blue">
-                      Class teacher
+                      Class head
                     </span>
                   )}
                 </div>
                 <p className="mt-1 text-sm text-foreground/60">
-                  {item.subject}
+                  {item.subjects && item.subjects.length > 0
+                    ? `Subject teacher: ${item.subjects.map((subject) => subject.name).join(", ")}`
+                    : "Class assignment"}
                 </p>
               </div>
               <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-blue-light text-blue">
@@ -75,7 +110,8 @@ export default function StaffClassesPage() {
               </a>
             </div>
           </article>
-        ))}
+          ))
+        )}
       </div>
     </div>
   );
