@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Megaphone01Icon,
@@ -12,6 +12,7 @@ import {
   Cancel01Icon,
   DashboardSquare01Icon,
   Logout01Icon,
+  Setting06Icon,
 } from "@hugeicons/core-free-icons";
 import {
   announcementReadStorageKey,
@@ -55,9 +56,10 @@ interface SidebarProps {
 
 export default function StaffSidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/portal/login";
+    router.push("/portal/login");
   };
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
 
@@ -184,6 +186,14 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
         </nav>
 
         <div className="border-t border-white/10 px-3 py-4">
+          <Link
+            href="/dashboard/staff/settings"
+            onClick={closeOnMobile}
+            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"
+          >
+            <HugeiconsIcon icon={Setting06Icon} size={20} />
+            Settings
+          </Link>
           <button
             onClick={logout}
             className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors hover:bg-white/5 hover:text-white"

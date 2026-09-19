@@ -13,6 +13,7 @@ const titles: Record<string, string> = {
   "/dashboard/staff/assignments": "Assignments",
   "/dashboard/staff/results": "Results",
   "/dashboard/staff/announcements": "Announcements",
+  "/dashboard/staff/settings": "Settings",
 };
 
 interface TopbarProps {

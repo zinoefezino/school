@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -16,6 +17,7 @@ import {
   Setting06Icon,
   Logout01Icon,
   Cancel01Icon,
+  NewspaperIcon,
 } from "@hugeicons/core-free-icons";
 
 const navItems = [
@@ -54,6 +56,11 @@ const navItems = [
     href: "/dashboard/admin/announcements",
     icon: Megaphone01Icon,
   },
+  {
+    label: "News",
+    href: "/dashboard/admin/news",
+    icon: NewspaperIcon,
+  },
 ];
 
 interface SidebarProps {
@@ -63,9 +70,10 @@ interface SidebarProps {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/portal/login";
+    router.push("/portal/login");
   };
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<(HTMLAnchorElement | null)[]>([]);

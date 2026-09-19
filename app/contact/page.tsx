@@ -3,7 +3,6 @@ import {
   Call02Icon,
   Mail01Icon,
   WhatsappIcon,
-  MapPinIcon,
   Clock01Icon,
 } from "@hugeicons/core-free-icons";
 import Header from "@/components/Header";
@@ -33,7 +32,7 @@ const contactMethods = [
 
 const officeHours = [
   { day: "Monday – Friday", hours: "7:30 AM – 4:00 PM" },
-  { day: "Saturday", hours: "9:00 AM – 12:00 PM (admissions only)" },
+  { day: "Saturday", hours: "Closed" },
   { day: "Sunday", hours: "Closed" },
 ];
 
@@ -60,7 +59,7 @@ export default function ContactPage() {
       {/* Page header */}
       <section className="relative overflow-hidden bg-navy">
         <Image
-          src=""
+          src="/hero6.jpeg"
           alt="Fairview Academy front gate"
           fill
           priority
@@ -106,11 +105,15 @@ export default function ContactPage() {
       <section className="bg-blue-light">
         <div className="mx-auto grid max-w-6xl gap-6 px-6 py-16 lg:grid-cols-2">
           <div className="flex flex-col overflow-hidden rounded-2xl bg-white">
-            <div className="flex aspect-video items-center justify-center bg-navy/5">
-              <div className="flex flex-col items-center gap-2 text-navy/40">
-                <HugeiconsIcon icon={MapPinIcon} size={32} />
-                <span className="text-sm">Map goes here</span>
-              </div>
+            <div className="aspect-video bg-navy/5">
+              <iframe
+                title="Fairview Academy location map"
+                src="https://www.google.com/maps?q=Warri%2C%20Delta%20State%2C%20Nigeria&output=embed"
+                className="h-full w-full border-0"
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                allowFullScreen
+              />
             </div>
             <div className="p-6">
               <p className="text-sm font-medium text-foreground">

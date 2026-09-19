@@ -5,7 +5,6 @@ import {
   HandshakeIcon,
   StudentsIcon,
   BulbIcon,
-  Image01Icon,
   ArrowRight02Icon,
 } from "@hugeicons/core-free-icons";
 import Header from "@/components/Header";
@@ -39,9 +38,17 @@ const values = [
 ];
 
 const leadership = [
-  { name: "Dr. Ifeoma Adeleke", title: "Principal" },
-  { name: "Mr. Bassey Umoh", title: "Vice Principal, Academics" },
-  { name: "Mrs. Ronke Fashina", title: "Head of Pastoral Care" },
+  { name: "Dr. Ifeoma Adeleke", title: "Principal", image: "/teacher.jpg" },
+  {
+    name: "Mr. Bassey Umoh",
+    title: "Vice Principal, Academics",
+    image: "/teacher.jpg",
+  },
+  {
+    name: "Mrs. Ronke Fashina",
+    title: "Head of Pastoral Care",
+    image: "/teacher.jpg",
+  },
 ];
 
 const accreditations = [
@@ -59,7 +66,7 @@ export default function AboutPage() {
       {/* Page header */}
       <section className="relative overflow-hidden bg-navy">
         <Image
-          src=""
+          src="/hero.jpg"
           alt="Fairview Academy students on campus"
           fill
           priority
@@ -181,21 +188,24 @@ export default function AboutPage() {
             {leadership.map((person) => (
               <div
                 key={person.name}
-                className="rounded-2xl bg-white p-6 text-center"
+                className="overflow-hidden rounded-2xl bg-white"
               >
-                <div className="mx-auto flex aspect-square w-20 items-center justify-center rounded-full bg-blue-light">
-                  <HugeiconsIcon
-                    icon={Image01Icon}
-                    size={24}
-                    className="text-navy/40"
+                <div className="relative aspect-4/5 bg-blue-light">
+                  <Image
+                    src={person.image}
+                    alt={person.name}
+                    fill
+                    className="object-cover"
                   />
                 </div>
-                <h3 className="mt-4 text-sm font-medium text-foreground">
-                  {person.name}
-                </h3>
-                <p className="mt-1 text-xs text-foreground/60">
-                  {person.title}
-                </p>
+                <div className="p-5 text-left">
+                  <h3 className="text-base font-medium text-foreground">
+                    {person.name}
+                  </h3>
+                  <p className="mt-1 text-sm text-foreground/60">
+                    {person.title}
+                  </p>
+                </div>
               </div>
             ))}
           </div>
@@ -229,13 +239,13 @@ export default function AboutPage() {
           </h2>
           <div className="flex flex-wrap items-center justify-center gap-4">
             <a
-              href="/#admissions"
+              href="/admissions"
               className="rounded-full bg-blue px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-blue-700"
             >
               Apply now
             </a>
             <a
-              href="/#tour"
+              href="/contact"
               className="flex items-center gap-2 rounded-full border border-white/40 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-white/10"
             >
               Schedule a tour

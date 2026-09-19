@@ -19,6 +19,7 @@ import {
   Logout01Icon,
   Cancel01Icon,
   ChevronDownIcon,
+  Setting06Icon,
 } from "@hugeicons/core-free-icons";
 import {
   announcementReadIdsStorageKey,
@@ -101,6 +102,11 @@ const bottomLevel: NavItem[] = [
     label: "Announcements",
     href: "/dashboard/student/announcements",
     icon: Megaphone01Icon,
+  },
+  {
+    label: "Settings",
+    href: "/dashboard/student/settings",
+    icon: Setting06Icon,
   },
 ];
 

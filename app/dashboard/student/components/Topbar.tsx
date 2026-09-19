@@ -17,6 +17,7 @@ const titles: Record<string, string> = {
   "/dashboard/student/payment-history": "Payment history",
   "/dashboard/student/announcements": "Announcements",
   "/dashboard/student/messages": "Messages",
+  "/dashboard/student/settings": "Settings",
 };
 
 interface TopbarProps {

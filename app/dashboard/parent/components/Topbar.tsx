@@ -12,6 +12,7 @@ const titles: Record<string, string> = {
   "/dashboard/parent/results": "Results",
   "/dashboard/parent/attendance": "Attendance",
   "/dashboard/parent/announcements": "Announcements",
+  "/dashboard/parent/settings": "Settings",
 };
 
 export default function ParentTopbar({

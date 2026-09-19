@@ -9,17 +9,17 @@ import {
 } from "@hugeicons/core-free-icons";
 
 const quickLinks = [
-  { label: "About", href: "#about" },
-  { label: "Academics", href: "#academics" },
-  { label: "Admissions", href: "#admissions" },
-  { label: "Gallery", href: "#gallery" },
+  { label: "About", href: "/about" },
+  { label: "Academics", href: "/academics" },
+  { label: "Admissions", href: "/admissions" },
+  { label: "News", href: "/news" },
 ];
 
 const resources = [
   { label: "Portal login", href: "/portal/login" },
-  { label: "Calendar & term dates", href: "#calendar" },
-  { label: "Fees & payments", href: "#fees" },
-  { label: "Careers", href: "#careers" },
+  { label: "Calendar & term dates", href: "/academics" },
+  { label: "Fees & payments", href: "/admissions" },
+  { label: "Contact admissions", href: "/contact" },
 ];
 
 export default function Footer() {

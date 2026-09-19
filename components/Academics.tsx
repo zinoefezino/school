@@ -36,7 +36,7 @@ const programs = [
 
 export default function Academics() {
   return (
-    <section className="">
+    <section id="academics" className="">
       <div className="mx-auto max-w-6xl px-6 py-20 lg:py-28">
         <div className="max-w-xl">
           <h2 className="text-3xl font-bold leading-tight text-foreground">
@@ -63,7 +63,7 @@ export default function Academics() {
                 />
               </div>
               <div className="flex flex-1 flex-col p-6 bg-blue-light">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-blue">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-blue">
                   <HugeiconsIcon icon={program.icon} size={18} />
                 </span>
                 <h3 className="mt-4 text-base font-medium text-foreground">
@@ -76,7 +76,7 @@ export default function Academics() {
                   {program.description}
                 </p>
                 <a
-                  href="#academics"
+                  href="/academics"
                   className="mt-5 flex items-center gap-1.5 text-sm font-medium text-navy"
                 >
                   Learn more

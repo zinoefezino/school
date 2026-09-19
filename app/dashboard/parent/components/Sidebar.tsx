@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useRef } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -12,6 +12,7 @@ import {
   DashboardSquare01Icon,
   Logout01Icon,
   Megaphone01Icon,
+  Setting06Icon,
   StudentsIcon,
 } from "@hugeicons/core-free-icons";
 
@@ -52,6 +53,7 @@ export default function ParentSidebar({
   onClose: () => void;
 }) {
   const pathname = usePathname();
+  const router = useRouter();
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const indicator = useRef({ top: 0, height: 0, visible: false });
@@ -83,7 +85,7 @@ export default function ParentSidebar({
   };
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/portal/login";
+    router.push("/portal/login");
   };
   return (
     <>
@@ -144,6 +146,14 @@ export default function ParentSidebar({
           })}
         </nav>
         <div className="border-t border-white/10 px-3 py-4">
+          <Link
+            href="/dashboard/parent/settings"
+            onClick={closeOnMobile}
+            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+          >
+            <HugeiconsIcon icon={Setting06Icon} size={20} />
+            Settings
+          </Link>
           <button
             onClick={logout}
             className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"

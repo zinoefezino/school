@@ -44,10 +44,12 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Main roles
 
-- Admin: manages students, staff, parents, classes, academics, announcements, fees, attendance overview, assignments, and timetable.
+- Admin: manages students, staff, parents, classes, academics, announcements, public news, fees, attendance overview, assignments, and timetable.
 - Staff: views assigned classes, records attendance for classes they head, enters results, publishes assignments, and manages timetable entries for subjects they teach.
 - Student: views profile, classes, attendance, results, assignments, timetable, announcements, messages placeholder, and payment history.
 - Parent: views children, attendance, results, fees, and announcements.
+
+Students, parents, staff, and admins can change their own passwords from their dashboard settings/password page.
 
 ## Academic model
 
@@ -280,7 +282,58 @@ Admins can delete announcements so old notices do not pile up.
 
 For students, new announcements show a badge count in the sidebar until the student opens the announcements page.
 
-### 13. Fees and payment records
+### 13. Public news flow
+
+News is separate from announcements.
+
+```txt
+Announcement = private dashboard notice
+NewsPost = public homepage/news content
+```
+
+Admins publish public news from:
+
+```txt
+Dashboard → Admin → News
+```
+
+A news post includes:
+
+- title
+- slug
+- excerpt
+- full story body
+- optional category
+- cover photo URL
+- draft or published status
+- publish date
+
+Published news appears in:
+
+- homepage Latest News section
+- `/news`
+- `/news/[slug]`
+
+The first version stores `coverImageUrl` as a URL so admins can paste a photo link.
+
+Before production, add proper image upload storage for news photos. Recommended options include Cloudinary, S3/R2, Vercel Blob, Firebase Storage, or another managed object storage provider. Do not rely on pasted external image URLs for the production news workflow.
+
+### 14. Public academics and admissions pages
+
+The homepage keeps short preview sections for Academics and Admissions, while full public pages provide more detail:
+
+```txt
+/academics
+/admissions
+```
+
+`/academics` explains the school stages, teaching model, assessment approach, subjects, and the difference between class teachers and subject teachers.
+
+`/admissions` explains the enquiry-to-enrollment flow, required documents, class placement, parent/student linking, and what happens after admission.
+
+These pages currently use static website copy and existing images from the `public` folder. They do not need admin management yet unless the school wants non-technical admins to edit website copy from the dashboard later.
+
+### 15. Fees and payment records
 
 Invoices are stored per student:
 

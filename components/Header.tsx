@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
   Add01Icon,
@@ -11,9 +12,9 @@ import {
 const navLinks = [
   { label: "Home", href: "/" },
   { label: "About", href: "/about" },
-  { label: "Academics", href: "#academics" },
-  { label: "Admissions", href: "#admissions" },
-  { label: "News", href: "#news" },
+  { label: "Academics", href: "/academics" },
+  { label: "Admissions", href: "/admissions" },
+  { label: "News", href: "/news" },
   { label: "Contact", href: "/contact" },
 ];
 
@@ -38,9 +39,9 @@ export default function Header() {
   return (
     <header className="sticky top-0 z-50 w-full border-b border-black/5 bg-white">
       <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-4">
-        <a href="#" className="flex items-center gap-2.5">
+        <Link href="/" className="flex items-center gap-2.5">
           <span className="text-lg font-medium ">School</span>
-        </a>
+        </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">
           {navLinks.map((link) => (
@@ -91,7 +92,7 @@ export default function Header() {
             )}
           </div>
           <a
-            href="#admissions"
+            href="/admissions"
             className="rounded-full bg-blue px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-blue-700"
           >
             Apply now
@@ -191,7 +192,7 @@ export default function Header() {
           </div>
 
           <a
-            href="#admissions"
+            href="/admissions"
             className="rounded-full bg-blue px-6 py-3 text-center text-sm font-medium text-white transition-colors hover:bg-blue-700"
             onClick={() => setOpen(false)}
           >

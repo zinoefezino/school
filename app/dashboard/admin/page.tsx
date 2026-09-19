@@ -10,6 +10,7 @@ import {
   StudentsIcon,
   TeacherIcon,
   UserAdd01Icon,
+  NewspaperIcon,
 } from "@hugeicons/core-free-icons";
 
 const quickActions = [
@@ -23,6 +24,11 @@ const quickActions = [
     label: "Post announcement",
     href: "/dashboard/admin/announcements/new",
     icon: Megaphone01Icon,
+  },
+  {
+    label: "Post news",
+    href: "/dashboard/admin/news",
+    icon: NewspaperIcon,
   },
 ];
 const statCards = [

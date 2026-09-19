@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import Gallery from "@/components/Gallery";
 import Header from "@/components/Header";
 import Hero from "@/components/Hero";
+import LatestNews from "@/components/LatestNews";
 import WhyUs from "@/components/WhyUs";
 
 export default function Home() {
@@ -14,6 +15,7 @@ export default function Home() {
       <WhyUs />
       <Academics />
       <Admissions />
+      <LatestNews />
       <Gallery />
       <Footer />
       <main className="flex-1" />
