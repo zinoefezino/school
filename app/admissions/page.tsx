@@ -154,7 +154,7 @@ export default function AdmissionsPage() {
           </div>
         </section>
 
-        <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
+        {/* <section className="mx-auto max-w-6xl px-6 py-16 lg:py-24">
           <div className="grid gap-10 lg:grid-cols-[420px_1fr]">
             <div>
               <div className="flex h-12 w-12 items-center justify-center rounded-full bg-blue-light text-blue">
@@ -180,7 +180,7 @@ export default function AdmissionsPage() {
               ))}
             </div>
           </div>
-        </section>
+        </section> */}
       </main>
       <Footer />
     </div>
