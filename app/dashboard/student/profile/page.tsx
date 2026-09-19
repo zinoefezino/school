@@ -21,6 +21,10 @@ type StudentOverview = {
   enrollment?: {
     classSection?: { name?: string; classLevel?: { name?: string } };
   };
+  previousEnrollment?: {
+    classSection?: { name?: string; classLevel?: { name?: string } };
+  };
+  academicStatus?: "ACTIVE" | "PROMOTED" | "COMPLETED" | "UNASSIGNED";
   guardian?: {
     fullName?: string;
     phone?: string;
@@ -67,9 +71,23 @@ export default function ProfilePage() {
         data.enrollment.classSection.name ?? ""
       }`.trim()
     : "Not assigned";
+  const previousClass = data.previousEnrollment?.classSection
+    ? `${data.previousEnrollment.classSection.classLevel?.name ?? ""} ${
+        data.previousEnrollment.classSection.name ?? ""
+      }`.trim()
+    : "";
+  const academicStatus =
+    data.academicStatus === "PROMOTED" && previousClass
+      ? `Promoted from ${previousClass}`
+      : data.academicStatus === "COMPLETED"
+        ? "Completed or graduated"
+        : data.academicStatus === "UNASSIGNED"
+          ? "Awaiting class assignment"
+          : "Currently enrolled";
   const details = [
     { label: "Student", value: data.fullName, icon: UserIcon },
     { label: "Class", value: className, icon: Book02Icon },
+    { label: "Academic status", value: academicStatus, icon: CalendarCheckIcon },
     { label: "Term", value: data.term?.name ?? "Not published", icon: Calendar03Icon },
     {
       label: "Session",

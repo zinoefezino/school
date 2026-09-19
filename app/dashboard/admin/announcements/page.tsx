@@ -27,12 +27,25 @@ export default function AdminAnnouncementsPage() {
   const [loading, setLoading] = useState(true);
   const [deletingId, setDeletingId] = useState("");
   const [status, setStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
   useEffect(() => {
-    fetch("/api/announcements")
-      .then((response) => response.json())
-      .then((data) => setItems(data.announcements ?? []))
+    const audience = filter === "ALL" ? "" : `&audience=${filter}`;
+    fetch(`/api/announcements?page=${page}&limit=10${audience}`)
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => {
+        setItems(data?.announcements ?? []);
+        setPages(data?.pages ?? 1);
+        setTotal(data?.total ?? 0);
+      })
+      .catch(() => {
+        setItems([]);
+        setPages(1);
+        setTotal(0);
+      })
       .finally(() => setLoading(false));
-  }, []);
+  }, [filter, page]);
   const deleteAnnouncement = async (id: string) => {
     const item = items.find((announcement) => announcement._id === id);
     const confirmed = window.confirm(
@@ -51,6 +64,7 @@ export default function AdminAnnouncementsPage() {
       setItems((current) =>
         current.filter((announcement) => announcement._id !== id),
       );
+      setTotal((current) => Math.max(current - 1, 0));
       setStatus("Announcement deleted.");
     } catch (error) {
       setStatus(
@@ -62,23 +76,23 @@ export default function AdminAnnouncementsPage() {
       setDeletingId("");
     }
   };
-  const visible =
-    filter === "ALL"
-      ? items
-      : items.filter((item) => item.audiences.includes(filter));
   const filters: [Filter, string][] = [
     ["ALL", "All announcements"],
     ["STUDENT", "Students"],
     ["PARENT", "Parents"],
     ["STAFF", "Staff"],
   ];
+  const displayTotal = Math.max(total, items.length);
+  const headerText = loading
+    ? "Loading announcements"
+    : `${displayTotal.toLocaleString()} ${
+        displayTotal === 1 ? "announcement" : "announcements"
+      } shown`;
   return (
     <div className="flex flex-col gap-6">
       <div className="flex flex-wrap items-center justify-between gap-4">
         <div>
-          <p className="text-sm text-foreground/60">
-            {visible.length} announcements shown
-          </p>
+          <p className="text-sm text-foreground/60">{headerText}</p>
           <h2 className="mt-1 text-xl font-medium text-foreground">
             Announcements
           </h2>
@@ -95,7 +109,10 @@ export default function AdminAnnouncementsPage() {
         {filters.map(([value, label]) => (
           <button
             key={value}
-            onClick={() => setFilter(value)}
+            onClick={() => {
+              setFilter(value);
+              setPage(1);
+            }}
             className={`rounded-full px-4 py-2 text-sm font-medium ${filter === value ? "bg-navy text-white" : "bg-white text-foreground/60 hover:bg-blue-light"}`}
           >
             {label}
@@ -113,12 +130,12 @@ export default function AdminAnnouncementsPage() {
             label="Loading announcements..."
             className="rounded-2xl bg-white p-6"
           />
-        ) : visible.length === 0 ? (
+        ) : items.length === 0 ? (
           <p className="rounded-2xl bg-white p-6 text-sm text-foreground/60">
             No announcements found.
           </p>
         ) : (
-          visible.map((item) => (
+          items.map((item) => (
             <article
               key={item._id}
               className="rounded-2xl border border-navy/10 bg-white p-6"
@@ -156,6 +173,29 @@ export default function AdminAnnouncementsPage() {
             </article>
           ))
         )}
+      </div>
+      <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-5 py-3">
+        <p className="text-sm text-foreground/60">
+          Page {page} of {Math.max(pages, 1)}
+        </p>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            disabled={page <= 1 || loading}
+            onClick={() => setPage((current) => Math.max(1, current - 1))}
+            className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy hover:bg-blue-light disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Previous
+          </button>
+          <button
+            type="button"
+            disabled={page >= pages || loading}
+            onClick={() => setPage((current) => Math.min(pages, current + 1))}
+            className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy hover:bg-blue-light disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            Next
+          </button>
+        </div>
       </div>
     </div>
   );

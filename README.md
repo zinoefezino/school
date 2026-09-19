@@ -262,6 +262,13 @@ Students can download published results as:
 - PDF
 - DOCX
 
+Student and parent dashboards also surface academic status from enrollment history:
+
+- active enrollment only: currently enrolled
+- active enrollment plus completed enrollment history: promoted from the previous class
+- completed enrollment with no active enrollment: completed or graduated
+- no enrollment yet: awaiting class assignment
+
 ### 9. Attendance flow
 
 Attendance records are stored per student and date:
@@ -324,6 +331,8 @@ Admins can delete announcements so old notices do not pile up.
 For students, parents, and staff, new announcements show a badge count in the sidebar until the user opens the announcements page.
 
 Announcement read state is database backed per user through `AnnouncementRead`, so reading announcements on one device clears the count on other devices for the same login account. Admin deletion also removes the related read receipts.
+
+Announcement pages use server side pagination instead of loading every notice at once. Dashboards fetch a small page of announcements at a time, show a total count for the current audience/filter, and fall back to the visible page count if an older response does not include a total. This keeps the UI usable even when the school has many archived notices.
 
 ### 13. Public news flow
 

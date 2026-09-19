@@ -7,7 +7,7 @@ import { getSession } from "../../../lib/session";
 
 const allowedAudiences: AnnouncementAudience[] = ["STUDENT", "PARENT", "STAFF"];
 
-export async function GET() {
+export async function GET(request: Request) {
   const session = await getSession();
   if (!session)
     return NextResponse.json(
@@ -15,10 +15,32 @@ export async function GET() {
       { status: 401 },
     );
   await connectDB();
-  const audience = session.role === "ADMIN" ? null : session.role;
+  const params = new URL(request.url).searchParams;
+  const page = Math.max(Number(params.get("page") ?? 1), 1);
+  const limit = Math.min(Math.max(Number(params.get("limit") ?? 10), 1), 50);
+  const requestedAudience = params.get("audience") as AnnouncementAudience | null;
+  const audience =
+    session.role === "ADMIN"
+      ? requestedAudience && allowedAudiences.includes(requestedAudience)
+        ? requestedAudience
+        : null
+      : session.role;
   const query = audience ? { audiences: { $in: [audience] } } : {};
-  const items = await Announcement.find(query).sort({ publishedAt: -1 }).lean();
-  return NextResponse.json({ announcements: items });
+  const [items, total] = await Promise.all([
+    Announcement.find(query)
+      .sort({ publishedAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    Announcement.countDocuments(query),
+  ]);
+  return NextResponse.json({
+    announcements: items,
+    page,
+    limit,
+    total,
+    pages: Math.max(Math.ceil(total / limit), 1),
+  });
 }
 
 export async function POST(request: Request) {

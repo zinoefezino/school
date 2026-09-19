@@ -38,6 +38,20 @@ export default function FeesPage() {
   );
 
   if (loading) return <LoadingState label="Loading current bill..." />;
+  const currentBillStatus = currentBill
+    ? currentBill.balance > 0
+      ? "Outstanding"
+      : currentBill.status === "PAID" || currentBill.paidAmount > 0
+        ? "Paid in full"
+        : "No payment due"
+    : "No bill assigned";
+  const currentBillStatusClass = currentBill
+    ? currentBill.balance > 0
+      ? "text-[#B4483B]"
+      : currentBill.status === "PAID" || currentBill.paidAmount > 0
+        ? "text-[#3F7A5B]"
+        : "text-foreground/60"
+    : "text-foreground/60";
 
   return (
     <div className="flex flex-col gap-6">
@@ -57,16 +71,10 @@ export default function FeesPage() {
           <HugeiconsIcon icon={Coins01Icon} size={25} className="text-blue" />
         </div>
         <p className="mt-6 text-3xl font-medium text-foreground">
-          {formatNaira(currentBill?.balance ?? 0)}
+          {currentBill ? formatNaira(currentBill.balance) : "No bill"}
         </p>
-        <p
-          className={`mt-1 text-sm ${
-            (currentBill?.balance ?? 0) > 0
-              ? "text-[#B4483B]"
-              : "text-[#3F7A5B]"
-          }`}
-        >
-          {(currentBill?.balance ?? 0) > 0 ? "Outstanding" : "Paid in full"}
+        <p className={`mt-1 text-sm ${currentBillStatusClass}`}>
+          {currentBillStatus}
         </p>
       </div>
 

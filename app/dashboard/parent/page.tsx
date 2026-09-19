@@ -27,13 +27,26 @@ type ChildSummary = {
   classSection: string;
   attendance: string;
   average: string;
-  balance: number;
+  balance: number | null;
+  hasBill: boolean;
+  billPaid: boolean;
   dueDate: string;
   avatar: string;
+  academicStatus: "ACTIVE" | "PROMOTED" | "COMPLETED" | "UNASSIGNED";
+  previousClassName?: string;
 };
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG")}`;
+}
+
+function academicStatusLabel(child: ChildSummary) {
+  if (child.academicStatus === "PROMOTED" && child.previousClassName) {
+    return `Promoted from ${child.previousClassName}`;
+  }
+  if (child.academicStatus === "COMPLETED") return "Completed or graduated";
+  if (child.academicStatus === "UNASSIGNED") return "Awaiting class assignment";
+  return "Currently enrolled";
 }
 
 export default function ParentDashboard() {
@@ -146,6 +159,9 @@ export default function ParentDashboard() {
             <p className="mt-1 text-sm text-foreground/60">
               {child.admissionNumber} · {child.classSection}
             </p>
+            <p className="mt-2 inline-flex rounded-full bg-blue-light px-3 py-1 text-xs font-medium text-navy">
+              {academicStatusLabel(child)}
+            </p>
           </div>
         </div>
         <div className="mt-6 grid gap-4 sm:grid-cols-3">
@@ -174,7 +190,7 @@ export default function ParentDashboard() {
           <div className="rounded-xl bg-blue-light/50 p-4">
             <HugeiconsIcon icon={Coins01Icon} size={20} className="text-blue" />
             <p className="mt-3 text-2xl font-medium text-foreground">
-              {formatNaira(child.balance)}
+              {child.balance === null ? "No bill" : formatNaira(child.balance)}
             </p>
             <p className="mt-1 text-sm text-foreground/60">Fees balance</p>
           </div>
@@ -198,22 +214,30 @@ export default function ParentDashboard() {
             <div>
               <p className="text-sm text-foreground/60">Outstanding balance</p>
               <p className="mt-1 text-2xl font-medium text-foreground">
-                {formatNaira(child.balance)}
+                {child.balance === null ? "No bill" : formatNaira(child.balance)}
               </p>
               <p className="mt-1 text-xs text-foreground/50">
                 Due {child.dueDate}
               </p>
             </div>
-            {child.balance > 0 ? (
+            {child.balance !== null && child.balance > 0 ? (
               <a
                 href="/dashboard/parent/fees"
                 className="rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
               >
                 Pay fees
               </a>
-            ) : (
+            ) : child.billPaid ? (
               <span className="rounded-full bg-[#3F7A5B]/10 px-3 py-2 text-sm font-medium text-[#3F7A5B]">
                 Paid in full
+              </span>
+            ) : child.hasBill ? (
+              <span className="rounded-full bg-blue-light px-3 py-2 text-sm font-medium text-navy">
+                No payment due
+              </span>
+            ) : (
+              <span className="rounded-full bg-blue-light px-3 py-2 text-sm font-medium text-navy">
+                No bill assigned
               </span>
             )}
           </div>

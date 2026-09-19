@@ -22,12 +22,16 @@ type StudentOverview = {
   dateOfBirth: string;
   gender?: "male" | "female";
   attendance: number;
-  feesBalance: number;
+  feesBalance: number | null;
   average: number | null;
   term?: { name?: string; session?: { name?: string } };
   enrollment?: {
     classSection?: { name?: string; classLevel?: { name?: string } };
   };
+  previousEnrollment?: {
+    classSection?: { name?: string; classLevel?: { name?: string } };
+  };
+  academicStatus?: "ACTIVE" | "PROMOTED" | "COMPLETED" | "UNASSIGNED";
 };
 type Announcement = { title: string; publishedAt: string };
 
@@ -89,6 +93,19 @@ export default function StudentDashboard() {
     },
     { label: "Age", value: `${age} years`, icon: CakeIcon },
   ];
+  const previousClass = data.previousEnrollment?.classSection
+    ? `${data.previousEnrollment.classSection.classLevel?.name ?? ""} ${
+        data.previousEnrollment.classSection.name ?? ""
+      }`.trim()
+    : "";
+  const academicStatusLabel =
+    data.academicStatus === "PROMOTED" && previousClass
+      ? `Promoted from ${previousClass}`
+      : data.academicStatus === "COMPLETED"
+        ? "Completed or graduated"
+        : data.academicStatus === "UNASSIGNED"
+          ? "Awaiting class assignment"
+          : "Currently enrolled";
   return (
     <div className="flex flex-col gap-8">
       <div className="rounded-2xl border border-navy/10 bg-white p-6">
@@ -105,6 +122,9 @@ export default function StudentDashboard() {
             </h1>
             <p className="mt-1 text-sm text-foreground/60">
               Admission no. {data.admissionNumber}
+            </p>
+            <p className="mt-2 inline-flex rounded-full bg-blue-light px-3 py-1 text-xs font-medium text-navy">
+              {academicStatusLabel}
             </p>
           </div>
         </div>
@@ -141,7 +161,9 @@ export default function StudentDashboard() {
         <div className="rounded-2xl border border-navy/10 bg-white p-5">
           <HugeiconsIcon icon={Coins01Icon} size={20} className="text-blue" />
           <p className="mt-4 text-2xl font-medium text-foreground">
-            ₦{data.feesBalance.toLocaleString()}
+            {data.feesBalance === null
+              ? "No bill"
+              : `₦${data.feesBalance.toLocaleString()}`}
           </p>
           <p className="mt-1 text-sm text-foreground/60">Fees balance</p>
         </div>

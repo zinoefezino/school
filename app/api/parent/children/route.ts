@@ -10,6 +10,10 @@ import Attendance from "../../../../models/Attendance";
 import Assessment from "../../../../models/Assessment";
 import Invoice from "../../../../models/Invoice";
 import Term from "../../../../models/Term";
+import Payment from "../../../../models/Payment";
+import "../../../../models/User";
+import "../../../../models/ClassSection";
+import "../../../../models/ClassLevel";
 
 function initials(name: string) {
   return name
@@ -41,7 +45,7 @@ export async function GET() {
     const publishedTermIds = publishedTerms.map((term) => term._id);
     const [enrollments, attendanceRecords, assessments, invoices] =
       await Promise.all([
-        Enrollment.find({ student: { $in: childIds }, status: "ACTIVE" })
+        Enrollment.find({ student: { $in: childIds } })
           .populate({
             path: "classSection",
             select: "name classLevel",
@@ -62,13 +66,39 @@ export async function GET() {
           .select("student amount status dueDate")
           .lean(),
       ]);
+    const payments = await Payment.find({
+      invoice: { $in: invoices.map((invoice) => invoice._id) },
+    })
+      .select("invoice amount")
+      .lean();
+    const paymentsByInvoice = new Map<string, number>();
+    payments.forEach((payment) => {
+      const key = payment.invoice.toString();
+      paymentsByInvoice.set(
+        key,
+        (paymentsByInvoice.get(key) ?? 0) + payment.amount,
+      );
+    });
 
     const summaries = children.map((child) => {
       const childId = child._id.toString();
-      const enrollment = enrollments.find(
-        (item) => item.student.toString() === childId,
+      const activeEnrollment = enrollments.find(
+        (item) =>
+          item.student.toString() === childId && item.status === "ACTIVE",
       );
-      const classSection = enrollment?.classSection as
+      const previousEnrollment = enrollments
+        .filter(
+          (item) =>
+            item.student.toString() === childId && item.status === "COMPLETED",
+        )
+        .at(-1);
+      const classSection = activeEnrollment?.classSection as
+        | {
+            name?: string;
+            classLevel?: { name?: string };
+          }
+        | undefined;
+      const previousClassSection = previousEnrollment?.classSection as
         | {
             name?: string;
             classLevel?: { name?: string };
@@ -86,9 +116,30 @@ export async function GET() {
       const latestInvoice = invoices.find(
         (item) => item.student.toString() === childId,
       );
-      const balance = latestInvoice?.status === "PAID"
-        ? 0
-        : (latestInvoice?.amount ?? 0);
+      const paidAmount = latestInvoice
+        ? (paymentsByInvoice.get(latestInvoice._id.toString()) ?? 0)
+        : 0;
+      const balance = latestInvoice
+        ? latestInvoice.status === "PAID"
+          ? 0
+          : Math.max(latestInvoice.amount - paidAmount, 0)
+        : null;
+      const billPaid = latestInvoice
+        ? latestInvoice.status === "PAID" ||
+          (latestInvoice.amount > 0 && paidAmount >= latestInvoice.amount)
+        : false;
+      const previousClassName = previousClassSection
+        ? `${previousClassSection.classLevel?.name ?? ""} ${
+            previousClassSection.name ?? ""
+          }`.trim()
+        : "";
+      const academicStatus = activeEnrollment
+        ? previousEnrollment
+          ? "PROMOTED"
+          : "ACTIVE"
+        : previousEnrollment
+          ? "COMPLETED"
+          : "UNASSIGNED";
 
       return {
         id: childId,
@@ -99,6 +150,8 @@ export async function GET() {
         classSection: classSection
           ? `${classSection.classLevel?.name ?? ""} ${classSection.name ?? ""}`.trim()
           : "Not assigned",
+        academicStatus,
+        previousClassName,
         attendance: childAttendance.length
           ? `${Math.round((present / childAttendance.length) * 100)}%`
           : "0%",
@@ -109,6 +162,8 @@ export async function GET() {
             )}%`
           : "-",
         balance,
+        hasBill: Boolean(latestInvoice),
+        billPaid,
         dueDate: latestInvoice?.dueDate
           ? new Date(latestInvoice.dueDate).toLocaleDateString()
           : "No due date",
