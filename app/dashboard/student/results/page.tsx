@@ -2,8 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { Certificate01Icon, TrendingUpIcon } from "@hugeicons/core-free-icons";
+import {
+  Certificate01Icon,
+  Download01Icon,
+  TrendingUpIcon,
+} from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import { studentReadResultTermsStorageKey } from "../../../../lib/announcements";
 
 type Result = {
   subject: string;
@@ -29,6 +34,14 @@ export default function ResultsPage() {
         const nextPeriods = data?.periods ?? [];
         setPeriods(nextPeriods);
         setSelectedTermId(nextPeriods[0]?.termId ?? "");
+        window.localStorage.setItem(
+          studentReadResultTermsStorageKey(),
+          JSON.stringify(
+            nextPeriods
+              .map((period: ResultPeriod) => period.termId)
+              .filter(Boolean),
+          ),
+        );
       })
       .catch(() => setPeriods([]))
       .finally(() => setLoading(false));
@@ -50,6 +63,15 @@ export default function ResultsPage() {
         results.length
       ).toFixed(1)
     : "0.0";
+  const downloadResult = (format: "pdf" | "docx") => {
+    if (!selectedPeriod?.termId || results.length === 0) return;
+    const link = document.createElement("a");
+    link.href = `/api/dashboard/student/results/export?termId=${selectedPeriod.termId}&format=${format}`;
+    link.rel = "noopener";
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
 
   return (
     <div className="flex flex-col gap-6">
@@ -63,6 +85,26 @@ export default function ResultsPage() {
           </h2>
         </div>
         <div className="flex flex-wrap gap-3">
+          {results.length > 0 && (
+            <div className="flex items-end gap-2">
+              <button
+                type="button"
+                onClick={() => downloadResult("pdf")}
+                className="flex items-center gap-2 rounded-full border border-navy/15 px-4 py-2.5 text-sm font-medium text-navy hover:bg-blue-light"
+              >
+                <HugeiconsIcon icon={Download01Icon} size={16} />
+                PDF
+              </button>
+              <button
+                type="button"
+                onClick={() => downloadResult("docx")}
+                className="flex items-center gap-2 rounded-full border border-navy/15 px-4 py-2.5 text-sm font-medium text-navy hover:bg-blue-light"
+              >
+                <HugeiconsIcon icon={Download01Icon} size={16} />
+                DOCX
+              </button>
+            </div>
+          )}
           <label className="flex flex-col gap-1 text-xs text-foreground/50">
             Session
             <select

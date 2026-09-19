@@ -18,6 +18,8 @@ type ChildSummary = {
 type Invoice = {
   _id?: string;
   amount: number;
+  paidAmount?: number;
+  balance?: number;
   status: string;
   student?: { _id?: string; fullName?: string };
   term?: { name?: string; session?: { name?: string } };
@@ -87,10 +89,12 @@ export default function ParentFeesPage() {
         <div className="grid gap-4 sm:grid-cols-2">
           {children.map((child) => {
             const invoice = invoices.find(
-              (item) => item.student?.fullName === child.name,
+              (item) =>
+                item.student?._id === child.id ||
+                item.student?.fullName === child.name,
             );
-            const balance =
-              invoice?.status === "PAID" ? 0 : (invoice?.amount ?? child.balance);
+            const hasInvoice = Boolean(invoice);
+            const balance = invoice?.balance ?? child.balance;
             const termName = invoice?.term?.name ?? "No active invoice";
             const sessionName = invoice?.term?.session?.name ?? "";
             return (
@@ -121,7 +125,11 @@ export default function ParentFeesPage() {
                 <p className="mt-1 text-sm text-foreground/60">
                   Outstanding balance
                 </p>
-                {balance > 0 ? (
+                {!hasInvoice ? (
+                  <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
+                    No bill has been assigned yet.
+                  </div>
+                ) : balance > 0 ? (
                   <button className="mt-5 w-full rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
                     Pay {formatNaira(balance)}
                   </button>

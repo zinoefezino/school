@@ -5,7 +5,7 @@ import { ArrowRight01Icon, BookOpen01Icon } from "@hugeicons/core-free-icons";
 export default function Hero() {
   return (
     <section className="relative overflow-hidden bg-[#f4f7fb]">
-      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.09)_1px,transparent_1px),linear-gradient(180deg,rgba(15,23,42,0.09)_1px,transparent_1px)] bg-[size:28px_28px]" />
+      <div className="absolute inset-0 bg-[linear-gradient(90deg,rgba(15,23,42,0.09)_1px,transparent_1px),linear-gradient(180deg,rgba(15,23,42,0.09)_1px,transparent_1px)] bg-size-[28px_28px]" />
       <div className="absolute inset-0 bg-linear-to-b from-white/35 via-transparent to-white/45" />
 
       <div className="relative z-10 mx-auto grid min-h-svh max-w-6xl items-center gap-12 px-6 py-20 sm:min-h-140 lg:grid-cols-2 lg:py-28">
@@ -33,7 +33,7 @@ export default function Hero() {
             </a>
 
             <a
-              href="#tour"
+              href="/about"
               className="flex items-center gap-2 rounded-full border border-navy/20 bg-white/75 px-6 py-3 text-sm font-medium text-navy backdrop-blur transition-colors hover:bg-white"
             >
               <HugeiconsIcon icon={BookOpen01Icon} size={18} />
@@ -42,7 +42,7 @@ export default function Hero() {
           </div>
         </div>
 
-        <div className="relative aspect-[4/5] w-full overflow-hidden rounded-2xl bg-slate-100 shadow-xl ring-1 ring-navy/10 sm:aspect-[5/4] lg:aspect-[4/5]">
+        <div className="relative aspect-4/5 w-full overflow-hidden rounded-2xl bg-slate-100 shadow-xl ring-1 ring-navy/10 sm:aspect-5/4 lg:aspect-4/5">
           <Image
             src="/hero.jpg"
             alt="Fairview Academy campus"

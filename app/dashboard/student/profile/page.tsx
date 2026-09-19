@@ -21,6 +21,11 @@ type StudentOverview = {
   enrollment?: {
     classSection?: { name?: string; classLevel?: { name?: string } };
   };
+  guardian?: {
+    fullName?: string;
+    phone?: string;
+    user?: { email?: string };
+  };
 };
 
 function getAge(dateOfBirth: string) {
@@ -109,6 +114,34 @@ export default function ProfilePage() {
             </div>
           </div>
         ))}
+      </div>
+      <div className="mt-6 border-t border-black/5 pt-6">
+        <h3 className="text-base font-medium text-foreground">
+          Assigned parent
+        </h3>
+        {data.guardian ? (
+          <div className="mt-4 rounded-xl bg-blue-light/50 p-4">
+            <div className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-full bg-white text-blue">
+                <HugeiconsIcon icon={UserIcon} size={17} />
+              </span>
+              <div>
+                <p className="text-sm font-medium text-foreground">
+                  {data.guardian.fullName ?? "Parent"}
+                </p>
+                <p className="mt-0.5 text-xs text-foreground/60">
+                  {[data.guardian.user?.email, data.guardian.phone]
+                    .filter(Boolean)
+                    .join(" · ") || "No contact details available"}
+                </p>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <p className="mt-4 rounded-xl border border-dashed border-navy/20 p-4 text-sm text-foreground/60">
+            No parent has been assigned to this student yet.
+          </p>
+        )}
       </div>
     </div>
   );

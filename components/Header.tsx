@@ -9,7 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 
 const navLinks = [
-  { label: "Home", href: "#home" },
+  { label: "Home", href: "/" },
   { label: "About", href: "/about" },
   { label: "Academics", href: "#academics" },
   { label: "Admissions", href: "#admissions" },

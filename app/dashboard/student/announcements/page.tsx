@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Megaphone01Icon } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import { announcementReadIdsStorageKey } from "../../../../lib/announcements";
 
 type Announcement = {
   _id: string;
@@ -19,7 +20,18 @@ export default function AnnouncementsPage() {
   useEffect(() => {
     fetch("/api/announcements")
       .then(async (response) => (response.ok ? response.json() : null))
-      .then((data) => setAnnouncements(data?.announcements ?? []))
+      .then((data) => {
+        const nextAnnouncements = data?.announcements ?? [];
+        setAnnouncements(nextAnnouncements);
+        window.localStorage.setItem(
+          announcementReadIdsStorageKey("STUDENT"),
+          JSON.stringify(
+            nextAnnouncements
+              .map((announcement: Announcement) => announcement._id)
+              .filter(Boolean),
+          ),
+        );
+      })
       .catch(() => setAnnouncements([]))
       .finally(() => setLoading(false));
   }, []);

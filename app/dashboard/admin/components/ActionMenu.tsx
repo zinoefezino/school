@@ -72,7 +72,7 @@ export default function ActionMenu({
     open && mounted
       ? createPortal(
           <div
-            className="fixed z-[100] w-36 rounded-xl border border-black/10 bg-white p-1 text-left shadow-lg"
+            className="fixed z-100 w-36 rounded-xl border border-black/10 bg-white p-1 text-left shadow-lg"
             style={{ top: position.top, left: position.left }}
           >
             <a

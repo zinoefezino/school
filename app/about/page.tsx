@@ -57,8 +57,17 @@ export default function AboutPage() {
       <Header />
 
       {/* Page header */}
-      <section className="bg-navy">
-        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
+      <section className="relative overflow-hidden bg-navy">
+        <Image
+          src=""
+          alt="Fairview Academy students on campus"
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-navy/80" />
+
+        <div className="relative z-10 mx-auto max-w-6xl px-6 py-16 lg:py-20">
           <h1 className="max-w-2xl text-3xl font-medium leading-tight text-white sm:text-4xl">
             Twenty years of shaping confident, capable students
           </h1>
@@ -72,9 +81,9 @@ export default function AboutPage() {
       {/* Our story */}
       <section className="bg-white">
         <div className="mx-auto grid max-w-6xl items-center gap-12 px-6 py-20 lg:grid-cols-2 lg:py-28">
-          <div className="relative aspect-[4/3] overflow-hidden rounded-2xl bg-blue-light">
+          <div className="relative aspect-4/3 overflow-hidden rounded-2xl bg-blue-light">
             <Image
-              src="/about/campus.jpg"
+              src="/hero6.jpeg"
               alt="Fairview Academy campus"
               fill
               className="object-cover"

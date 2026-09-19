@@ -1,59 +1,136 @@
-import { HugeiconsIcon } from "@hugeicons/react";
-import {
-  Coins01Icon,
-  Download01Icon,
-  ReceiptDollarIcon,
-} from "@hugeicons/core-free-icons";
+"use client";
 
-const feeItems = [
-  { label: "Tuition", amount: "₦85,000", status: "Paid" },
-  { label: "Learning materials", amount: "₦15,000", status: "Paid" },
-  { label: "Sports levy", amount: "₦5,000", status: "Paid" },
-];
+import { useEffect, useMemo, useState } from "react";
+import { HugeiconsIcon } from "@hugeicons/react";
+import { Coins01Icon, Invoice01Icon, ReceiptDollarIcon } from "@hugeicons/core-free-icons";
+import LoadingState from "../../components/LoadingState";
+
+type Bill = {
+  _id: string;
+  amount: number;
+  paidAmount: number;
+  balance: number;
+  dueDate: string;
+  status: "PENDING" | "PAID" | "OVERDUE";
+  term?: { name?: string; session?: { name?: string } };
+};
+
+function formatNaira(amount: number) {
+  return `₦${amount.toLocaleString("en-NG")}`;
+}
 
 export default function FeesPage() {
+  const [bills, setBills] = useState<Bill[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetch("/api/dashboard/student/payments")
+      .then(async (response) => (response.ok ? response.json() : null))
+      .then((data) => setBills(data?.bills ?? []))
+      .catch(() => setBills([]))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const currentBill = bills[0];
+  const outstanding = useMemo(
+    () => bills.reduce((total, bill) => total + bill.balance, 0),
+    [bills],
+  );
+
+  if (loading) return <LoadingState label="Loading current bill..." />;
+
   return (
     <div className="flex flex-col gap-6">
       <div className="rounded-2xl border border-navy/10 bg-white p-6">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm text-foreground/60">First Term · 2026/2027</p>
+            <p className="text-sm text-foreground/60">
+              {currentBill?.term?.name ?? "No active bill"}
+              {currentBill?.term?.session?.name
+                ? ` · ${currentBill.term.session.name}`
+                : ""}
+            </p>
             <h2 className="mt-1 text-xl font-medium text-foreground">
               Current bill
             </h2>
           </div>
           <HugeiconsIcon icon={Coins01Icon} size={25} className="text-blue" />
         </div>
-        <p className="mt-6 text-3xl font-medium text-foreground">₦0</p>
-        <p className="mt-1 text-sm text-[#3F7A5B]">Paid in full</p>
+        <p className="mt-6 text-3xl font-medium text-foreground">
+          {formatNaira(currentBill?.balance ?? 0)}
+        </p>
+        <p
+          className={`mt-1 text-sm ${
+            (currentBill?.balance ?? 0) > 0
+              ? "text-[#B4483B]"
+              : "text-[#3F7A5B]"
+          }`}
+        >
+          {(currentBill?.balance ?? 0) > 0 ? "Outstanding" : "Paid in full"}
+        </p>
       </div>
+
+      <div className="rounded-2xl border border-navy/10 bg-white p-5">
+        <div className="flex items-center justify-between">
+          <span className="flex items-center gap-2 text-sm font-medium text-foreground">
+            <HugeiconsIcon
+              icon={Invoice01Icon}
+              size={18}
+              className="text-blue"
+            />
+            Total outstanding balance
+          </span>
+          <span className="text-lg font-semibold text-foreground">
+            {formatNaira(outstanding)}
+          </span>
+        </div>
+      </div>
+
       <div className="flex items-center justify-between">
-        <h2 className="text-base font-medium text-foreground">Fee breakdown</h2>
-        <button className="flex items-center gap-2 rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy hover:bg-blue-light">
-          <HugeiconsIcon icon={Download01Icon} size={17} />
-          Receipt
-        </button>
+        <h2 className="text-base font-medium text-foreground">Bill history</h2>
       </div>
-      <div className="rounded-2xl border border-navy/10 bg-white divide-y divide-black/5">
-        {feeItems.map((item) => (
-          <div
-            key={item.label}
-            className="flex items-center justify-between gap-4 p-5"
-          >
-            <span className="flex items-center gap-3 text-sm font-medium text-foreground">
-              <HugeiconsIcon
-                icon={ReceiptDollarIcon}
-                size={18}
-                className="text-blue"
-              />
-              {item.label}
-            </span>
-            <span className="text-right text-sm text-foreground/70">
-              {item.amount}
-              <span className="ml-3 text-[#3F7A5B]">{item.status}</span>
-            </span>
+      <div className="overflow-hidden rounded-2xl border border-navy/10 bg-white">
+        {bills.length === 0 ? (
+          <p className="p-8 text-center text-sm text-foreground/60">
+            No bills have been assigned to your account yet.
+          </p>
+        ) : (
+          <div className="divide-y divide-black/5">
+            {bills.map((bill) => (
+              <div
+                key={bill._id}
+                className="grid gap-4 p-5 sm:grid-cols-[1fr_auto_auto_auto]"
+              >
+                <span className="flex items-center gap-3 text-sm font-medium text-foreground">
+                  <HugeiconsIcon
+                    icon={ReceiptDollarIcon}
+                    size={18}
+                    className="text-blue"
+                  />
+                  <span>
+                    {bill.term?.name ?? "School bill"}
+                    <span className="block text-xs font-normal text-foreground/50">
+                      Due {new Date(bill.dueDate).toLocaleDateString()}
+                    </span>
+                  </span>
+                </span>
+                <span className="text-sm text-foreground/70">
+                  Billed: {formatNaira(bill.amount)}
+                </span>
+                <span className="text-sm text-foreground/70">
+                  Paid: {formatNaira(bill.paidAmount)}
+                </span>
+                <span
+                  className={`text-sm font-medium ${
+                    bill.balance > 0 ? "text-[#B4483B]" : "text-[#3F7A5B]"
+                  }`}
+                >
+                  {bill.status}
+                </span>
+              </div>
+            ))}
           </div>
-        ))}
+        )}
       </div>
     </div>
   );

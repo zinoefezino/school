@@ -60,6 +60,256 @@ The app separates class heads from subject teachers:
 
 Admin can manage subject-teacher assignments from Dashboard → Admin → Academics.
 
+## How the school flow works
+
+### 1. Users and profiles
+
+Authentication is handled through the `User` model. Each user has a role:
+
+- `ADMIN`
+- `STAFF`
+- `STUDENT`
+- `PARENT`
+
+Role-specific profile models then connect the login account to school data:
+
+- `Staff.user` points to the staff member's `User`.
+- `Student.user` points to the student's `User`.
+- `Guardian.user` points to the parent's `User`.
+
+This keeps login credentials separate from school records.
+
+### 2. Parents assigned to students
+
+A student can have an assigned parent/guardian:
+
+```txt
+Student.guardian → Guardian
+Guardian.user → User
+```
+
+When a parent logs in, the parent dashboard only loads students where:
+
+```txt
+Student.guardian = logged-in Guardian._id
+```
+
+The student profile also shows the assigned parent if one exists.
+
+### 3. Classes and class levels
+
+Classes are split into two concepts:
+
+- `ClassLevel`: the academic level, such as JSS 1, JSS 2, SS 1.
+- `ClassSection`: the actual class arm/section, such as JSS 1 Gold or SS 2 A.
+
+`ClassSection` points to `ClassLevel`:
+
+```txt
+ClassSection.classLevel → ClassLevel
+```
+
+This makes it possible to have many arms under the same level.
+
+### 4. How students are assigned to classes
+
+Students are assigned to classes through the `Enrollment` model.
+
+The student record does not directly store the current class. Instead:
+
+```txt
+Student → Enrollment → ClassSection
+```
+
+An enrollment connects:
+
+- `student`
+- `classSection`
+- `term`
+- `status`
+
+The active class for a student is the active enrollment:
+
+```txt
+Enrollment.status = ACTIVE
+```
+
+This is important because a student can move from one class/term/session to another over time without losing history.
+
+### 5. How class teachers are assigned
+
+A class teacher is the head/form teacher of a class.
+
+That relationship is stored directly on the class section:
+
+```txt
+ClassSection.classTeacher → Staff
+```
+
+The class teacher is responsible for class-level duties such as attendance. This is separate from subject teaching.
+
+### 6. How subject teachers are assigned
+
+Subject teachers are assigned separately through `TeachingAssignment`.
+
+```txt
+TeachingAssignment.classSection → ClassSection
+TeachingAssignment.subject → Subject
+TeachingAssignment.teacher → Staff
+```
+
+This means one class can have different teachers for different subjects.
+
+Example:
+
+```txt
+JSS 1 Gold + Mathematics → Mr. A
+JSS 1 Gold + English → Mrs. B
+JSS 1 Gold + Basic Science → Mr. C
+```
+
+The class teacher could still be someone else entirely.
+
+Admin manages this from:
+
+```txt
+Dashboard → Admin → Academics → Subject teachers
+```
+
+### 7. Staff dashboard rules
+
+The staff dashboard uses the class and subject relationships to decide what a staff member can do.
+
+A staff member sees:
+
+- classes where they are the class head
+- classes/subjects where they are the assigned subject teacher
+
+Permissions are separated like this:
+
+- Attendance: class teacher/class head only.
+- Results: assigned subject teacher only.
+- Assignments: assigned subject teacher only.
+- Timetable entries: assigned subject teacher only.
+
+This prevents a teacher from entering results or publishing assignments for a class/subject they do not teach.
+
+### 8. Results flow
+
+Results are stored as assessment records:
+
+```txt
+Assessment.student → Student
+Assessment.subject → Subject
+Assessment.term → Term
+```
+
+Staff enter scores for students in the class/subject assigned to them. Results can then be submitted for admin review using `ResultSubmission`.
+
+Students only see results for terms where:
+
+```txt
+Term.resultsPublished = true
+```
+
+When results are available, the student sidebar shows a badge count. Opening the results page marks those published result periods as read in browser storage.
+
+Students can download published results as:
+
+- PDF
+- DOCX
+
+### 9. Attendance flow
+
+Attendance records are stored per student and date:
+
+```txt
+Attendance.student → Student
+Attendance.term → Term
+Attendance.date
+Attendance.status
+```
+
+The class teacher/class head records attendance for students in their class.
+
+Students and parents see attendance summaries based on those records.
+
+### 10. Assignments flow
+
+Assignments are database-backed and connected to class, subject, term, and teacher:
+
+```txt
+Assignment.classSection → ClassSection
+Assignment.subject → Subject
+Assignment.term → Term
+Assignment.teacher → Staff
+```
+
+Assigned subject teachers can publish assignments for their own class/subject combinations. Students see assignments for their active class.
+
+### 11. Timetable flow
+
+Timetable entries are also database-backed:
+
+```txt
+TimetableEntry.classSection → ClassSection
+TimetableEntry.subject → Subject
+TimetableEntry.teacher → Staff
+TimetableEntry.term → Term, optional
+```
+
+Students see timetable entries for their active class. Staff can create timetable entries only for class/subject combinations assigned to them.
+
+### 12. Announcements flow
+
+Announcements are published by admins and targeted to one or more audiences:
+
+- students
+- parents
+- staff
+
+The same announcement system feeds:
+
+- admin announcements
+- student announcements
+- parent announcements
+- staff announcements
+- dashboard overview announcement cards
+
+Admins can delete announcements so old notices do not pile up.
+
+For students, new announcements show a badge count in the sidebar until the student opens the announcements page.
+
+### 13. Fees and payment records
+
+Invoices are stored per student:
+
+```txt
+Invoice.student → Student
+Invoice.term → Term
+Invoice.amount
+Invoice.status
+```
+
+Payments are stored against invoices:
+
+```txt
+Payment.invoice → Invoice
+Payment.amount
+Payment.paystackReference
+Payment.paidAt
+```
+
+Student and parent dashboards calculate outstanding balances from:
+
+```txt
+invoice amount - recorded payments
+```
+
+If no invoice exists yet, the UI shows that no bill has been assigned. It should not show "Paid in full" unless an actual invoice exists and its balance is zero.
+
+Gateway payment collection is intentionally left for the final payment integration phase.
+
 ## Implemented dashboard work
 
 - Removed hardcoded parent, student, and staff dashboard fixture data.

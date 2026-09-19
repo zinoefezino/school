@@ -4,6 +4,7 @@ import { getSession } from "../../../../../lib/session";
 import Student from "../../../../../models/Student";
 import Attendance from "../../../../../models/Attendance";
 import Invoice from "../../../../../models/Invoice";
+import Payment from "../../../../../models/Payment";
 import Assessment from "../../../../../models/Assessment";
 import Term from "../../../../../models/Term";
 import Enrollment from "../../../../../models/Enrollment";
@@ -17,7 +18,12 @@ export async function GET() {
     );
   await connectDB();
   const student = await Student.findOne({ user: session.userId })
-    .select("fullName admissionNumber dateOfBirth gender photoUrl")
+    .select("fullName admissionNumber dateOfBirth gender photoUrl guardian")
+    .populate({
+      path: "guardian",
+      select: "fullName phone user",
+      populate: { path: "user", select: "email" },
+    })
     .lean();
   if (!student)
     return NextResponse.json(
@@ -50,6 +56,14 @@ export async function GET() {
         .select("score")
         .lean()
     : [];
+  const paidAmount = invoice
+    ? await Payment.find({ invoice: invoice._id }).then((payments) =>
+        payments.reduce((sum, payment) => sum + payment.amount, 0),
+      )
+    : 0;
+  const feesBalance = invoice
+    ? Math.max(invoice.amount - paidAmount, 0)
+    : 0;
   return NextResponse.json({
     student,
     fullName: student.fullName,
@@ -57,12 +71,13 @@ export async function GET() {
     dateOfBirth: student.dateOfBirth,
     gender: student.gender,
     photoUrl: student.photoUrl,
+    guardian: student.guardian,
     enrollment,
     term,
     attendance: totalAttendance
       ? Math.round((attendance / totalAttendance) * 100)
       : 0,
-    feesBalance: invoice?.status === "PAID" ? 0 : (invoice?.amount ?? 0),
+    feesBalance,
     pendingAssignments: null,
     average: assessments.length
       ? Math.round(

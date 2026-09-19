@@ -8,6 +8,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+import Image from "next/image";
 
 const contactMethods = [
   {
@@ -56,13 +57,24 @@ export default function ContactPage() {
     <div className="flex min-h-screen flex-col bg-white">
       <Header />
 
-      <section className="bg-navy">
-        <div className="mx-auto max-w-6xl px-6 py-16 lg:py-20">
+      {/* Page header */}
+      <section className="relative overflow-hidden bg-navy">
+        <Image
+          src=""
+          alt="Fairview Academy front gate"
+          fill
+          priority
+          className="object-cover"
+        />
+        <div className="absolute inset-0 bg-navy/80" />
+
+        <div className="relative z-10 mx-auto max-w-6xl px-6 py-16 lg:py-20">
           <h1 className="max-w-2xl text-3xl font-medium leading-tight text-white sm:text-4xl">
             Get in touch
           </h1>
           <p className="mt-4 max-w-xl text-base leading-7 text-white/70">
-            Questions about admissions, fees, or a visit, reach us directly.
+            Questions about admissions, fees, or a visit, reach us directly, no
+            forms to fill out.
           </p>
         </div>
       </section>

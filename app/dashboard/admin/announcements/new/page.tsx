@@ -103,7 +103,7 @@ export default function NewAnnouncementPage() {
               name="body"
               rows={5}
               placeholder="Write the announcement..."
-              className="resize-y rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue"
+              className="resize-y rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
             />
           </label>
           <fieldset>
@@ -114,7 +114,7 @@ export default function NewAnnouncementPage() {
               {audienceOptions.map((option) => (
                 <label
                   key={option.value}
-                  className="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-4 text-sm text-foreground has-[:checked]:border-blue has-[:checked]:bg-blue-light"
+                  className="flex cursor-pointer items-center gap-3 rounded-xl border border-black/10 p-4 text-sm text-foreground has-checked:border-blue has-checked:bg-blue-light"
                 >
                   <input
                     type="checkbox"

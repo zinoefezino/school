@@ -24,13 +24,32 @@ export async function GET() {
     );
 
   const invoices = await Invoice.find({ student: student._id })
-    .select("_id")
+    .populate("term", "name session")
+    .sort({ dueDate: -1 })
     .lean();
   const payments = await Payment.find({
     invoice: { $in: invoices.map((invoice) => invoice._id) },
   })
     .sort({ paidAt: -1 })
     .lean();
+  const paymentsByInvoice = new Map<string, number>();
+  for (const payment of payments) {
+    const key = payment.invoice.toString();
+    paymentsByInvoice.set(key, (paymentsByInvoice.get(key) ?? 0) + payment.amount);
+  }
+  const bills = invoices.map((invoice) => {
+    const paidAmount = paymentsByInvoice.get(invoice._id.toString()) ?? 0;
+    const balance = Math.max(invoice.amount - paidAmount, 0);
+    return {
+      _id: invoice._id.toString(),
+      amount: invoice.amount,
+      paidAmount,
+      balance,
+      dueDate: invoice.dueDate,
+      status: balance <= 0 ? "PAID" : invoice.status,
+      term: invoice.term,
+    };
+  });
 
-  return NextResponse.json({ payments });
+  return NextResponse.json({ payments, bills });
 }

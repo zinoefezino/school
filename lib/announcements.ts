@@ -68,3 +68,13 @@ export function announcementReadStorageKey(
 ) {
   return `school-announcements-read-${audience.toLowerCase()}`;
 }
+
+export function announcementReadIdsStorageKey(
+  audience: "ADMIN" | AnnouncementAudience,
+) {
+  return `school-announcements-read-ids-${audience.toLowerCase()}`;
+}
+
+export function studentReadResultTermsStorageKey() {
+  return "school-student-read-result-terms";
+}

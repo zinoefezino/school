@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { HugeiconsIcon } from "@hugeicons/react";
 import {
@@ -20,8 +21,8 @@ import {
   ChevronDownIcon,
 } from "@hugeicons/core-free-icons";
 import {
-  announcementReadStorageKey,
-  unreadAnnouncementsFor,
+  announcementReadIdsStorageKey,
+  studentReadResultTermsStorageKey,
 } from "../../../../lib/announcements";
 
 type NavItem = {
@@ -117,19 +118,49 @@ function groupForPath(pathname: string) {
 
 export default function Sidebar({ open, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const router = useRouter();
   const logout = async () => {
     await fetch("/api/auth/logout", { method: "POST" });
-    window.location.href = "/portal/login";
+    router.push("/portal/login");
   };
-  const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
+  const [badges, setBadges] = useState({ announcements: 0, results: 0 });
 
   useEffect(() => {
-    const hasReadAnnouncements =
-      window.localStorage.getItem(announcementReadStorageKey("STUDENT")) ===
-      "true";
-    setUnreadAnnouncements(
-      hasReadAnnouncements ? 0 : unreadAnnouncementsFor("STUDENT"),
-    );
+    const readArray = (key: string) => {
+      try {
+        const value = window.localStorage.getItem(key);
+        return value ? (JSON.parse(value) as string[]) : [];
+      } catch {
+        return [];
+      }
+    };
+    Promise.all([
+      fetch("/api/announcements").then(async (response) =>
+        response.ok ? response.json() : { announcements: [] },
+      ),
+      fetch("/api/dashboard/student/results").then(async (response) =>
+        response.ok ? response.json() : { periods: [] },
+      ),
+    ])
+      .then(([announcementData, resultData]) => {
+        const readAnnouncementIds = new Set(
+          readArray(announcementReadIdsStorageKey("STUDENT")),
+        );
+        const readResultTerms = new Set(
+          readArray(studentReadResultTermsStorageKey()),
+        );
+        setBadges({
+          announcements: (announcementData.announcements ?? []).filter(
+            (item: { _id?: string }) =>
+              item._id && !readAnnouncementIds.has(item._id),
+          ).length,
+          results: (resultData.periods ?? []).filter(
+            (period: { termId?: string }) =>
+              period.termId && !readResultTerms.has(period.termId),
+          ).length,
+        });
+      })
+      .catch(() => setBadges({ announcements: 0, results: 0 }));
   }, [pathname]);
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
@@ -144,7 +175,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
 
   useEffect(() => {
     const match = groupForPath(pathname);
-    if (match) setOpenGroup(match);
+    if (match) Promise.resolve().then(() => setOpenGroup(match));
   }, [pathname]);
 
   const closeOnMobile = () => {
@@ -192,13 +223,6 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         }}
         href={item.href}
         onClick={() => {
-          if (item.label === "Announcements") {
-            window.localStorage.setItem(
-              announcementReadStorageKey("STUDENT"),
-              "true",
-            );
-            setUnreadAnnouncements(0);
-          }
           closeOnMobile();
         }}
         className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 lg:hover:bg-transparent ${
@@ -209,9 +233,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       >
         <HugeiconsIcon icon={item.icon} size={20} />
         <span>{item.label}</span>
-        {item.label === "Announcements" && unreadAnnouncements > 0 && (
+        {item.label === "Announcements" && badges.announcements > 0 && (
           <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
-            {unreadAnnouncements}
+            {badges.announcements}
+          </span>
+        )}
+        {item.label === "Results" && badges.results > 0 && (
+          <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+            {badges.results}
           </span>
         )}
       </Link>
