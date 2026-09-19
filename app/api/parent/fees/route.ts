@@ -8,6 +8,8 @@ import Payment from "../../../../models/Payment";
 import "../../../../models/Term";
 import "../../../../models/AcademicSession";
 import "../../../../models/Student";
+import "../../../../models/ClassSection";
+import "../../../../models/ClassLevel";
 
 export async function GET() {
   try {
@@ -22,6 +24,11 @@ export async function GET() {
         select: "name session",
         populate: { path: "session", select: "name" },
       })
+      .populate({
+        path: "classSection",
+        select: "name classLevel",
+        populate: { path: "classLevel", select: "name" },
+      })
       .sort({ dueDate: -1 })
       .lean();
     const payments = await Payment.find({
@@ -29,8 +36,15 @@ export async function GET() {
     })
       .populate({
         path: "invoice",
-        select: "student",
-        populate: { path: "student", select: "fullName admissionNumber" },
+        select: "student term",
+        populate: [
+          { path: "student", select: "fullName admissionNumber" },
+          {
+            path: "term",
+            select: "name session",
+            populate: { path: "session", select: "name" },
+          },
+        ],
       })
       .sort({ paidAt: -1 })
       .lean();

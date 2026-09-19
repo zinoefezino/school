@@ -25,7 +25,11 @@ type Invoice = {
   billPaid?: boolean;
   status: string;
   student?: { _id?: string; fullName?: string };
+  classSection?: { name?: string; classLevel?: { name?: string } };
   term?: { name?: string; session?: { name?: string } };
+  dueDate?: string;
+  allowInstallments?: boolean;
+  minimumInstallmentAmount?: number;
 };
 type Payment = {
   _id: string;
@@ -33,7 +37,8 @@ type Payment = {
   paystackReference: string;
   paidAt: string;
   invoice?: {
-    student?: { fullName?: string };
+    student?: { _id?: string; fullName?: string };
+    term?: { name?: string; session?: { name?: string } };
   };
 };
 
@@ -50,6 +55,8 @@ export default function ParentFeesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [payments, setPayments] = useState<Payment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedChildId, setSelectedChildId] = useState("");
+  const [message, setMessage] = useState("");
 
   useEffect(() => {
     Promise.all([
@@ -61,7 +68,9 @@ export default function ParentFeesPage() {
       ),
     ])
       .then(([childrenData, feesData]) => {
-        setChildren(childrenData?.children ?? []);
+        const nextChildren = childrenData?.children ?? [];
+        setChildren(nextChildren);
+        setSelectedChildId(nextChildren[0]?.id ?? "");
         setInvoices(feesData?.invoices ?? []);
         setPayments(feesData?.payments ?? []);
       })
@@ -72,6 +81,35 @@ export default function ParentFeesPage() {
       })
       .finally(() => setLoading(false));
   }, []);
+
+  async function startPayment(invoice: Invoice, amount: number) {
+    if (!invoice._id) return;
+    setMessage("");
+    const response = await fetch("/api/parent/payments", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ invoiceId: invoice._id, amount }),
+    });
+    const data = await response.json();
+    setMessage(
+      response.ok
+        ? "Payment started."
+        : (data.error ?? "Unable to start payment."),
+    );
+  }
+
+  const selectedChild =
+    children.find((child) => child.id === selectedChildId) ?? children[0];
+  const childInvoices = invoices.filter(
+    (invoice) =>
+      invoice.student?._id === selectedChild?.id ||
+      invoice.student?.fullName === selectedChild?.name,
+  );
+  const childPayments = payments.filter(
+    (payment) =>
+      payment.invoice?.student?._id === selectedChild?.id ||
+      payment.invoice?.student?.fullName === selectedChild?.name,
+  );
 
   return (
     <div className="flex flex-col gap-6">
@@ -93,68 +131,127 @@ export default function ParentFeesPage() {
           No students are linked to your parent account yet.
         </p>
       ) : (
-        <div className="grid gap-4 sm:grid-cols-2">
-          {children.map((child) => {
-            const invoice = invoices.find(
-              (item) =>
-                item.student?._id === child.id ||
-                item.student?.fullName === child.name,
-            );
-            const hasInvoice = Boolean(invoice);
-            const balance = invoice?.balance ?? child.balance ?? null;
-            const billPaid = invoice?.billPaid ?? child.billPaid ?? false;
-            const termName = invoice?.term?.name ?? "No active invoice";
-            const sessionName = invoice?.term?.session?.name ?? "";
-            return (
-              <article
-                key={child.id}
-                className="rounded-2xl border border-navy/10 bg-white p-6"
+        <section className="rounded-2xl border border-navy/10 bg-white p-6">
+          <div className="flex flex-wrap items-center justify-between gap-4">
+            <label className="flex min-w-64 flex-col gap-2 text-sm font-medium text-foreground">
+              Select child
+              <select
+                value={selectedChild?.id ?? ""}
+                onChange={(event) => setSelectedChildId(event.target.value)}
+                className="rounded-xl border border-black/10 bg-white px-4 py-3 font-normal"
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div>
-                    <h3 className="font-medium text-foreground">
-                      {child.name}
-                    </h3>
-                    <p className="mt-1 text-sm text-foreground/60">
-                      {[child.classSection, termName, sessionName]
-                        .filter(Boolean)
-                        .join(" · ")}
-                    </p>
-                  </div>
-                  <HugeiconsIcon
-                    icon={Coins01Icon}
-                    size={21}
-                    className="text-blue"
-                  />
-                </div>
-                <p className="mt-6 text-3xl font-medium text-foreground">
-                  {formatMaybeNaira(balance)}
-                </p>
-                <p className="mt-1 text-sm text-foreground/60">
-                  Outstanding balance
-                </p>
-                {!hasInvoice ? (
-                  <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
-                    No bill has been assigned yet.
-                  </div>
-                ) : balance !== null && balance > 0 ? (
-                  <button className="mt-5 w-full rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
-                    Pay {formatNaira(balance)}
-                  </button>
-                ) : billPaid ? (
-                  <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[#3F7A5B]">
-                    <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} />
-                    Paid in full
-                  </div>
-                ) : (
-                  <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
-                    No payment due.
-                  </div>
+                {children.map((child) => (
+                  <option key={child.id} value={child.id}>
+                    {child.name}
+                  </option>
+                ))}
+              </select>
+            </label>
+            <div className="text-right">
+              <p className="text-sm text-foreground/60">Outstanding balance</p>
+              <p className="text-2xl font-medium text-foreground">
+                {formatMaybeNaira(
+                  childInvoices.reduce(
+                    (sum, invoice) => sum + (invoice.balance ?? 0),
+                    0,
+                  ),
                 )}
-              </article>
-            );
-          })}
-        </div>
+              </p>
+            </div>
+          </div>
+
+          {message && (
+            <p className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
+              {message}
+            </p>
+          )}
+
+          <div className="mt-6 grid gap-4">
+            {childInvoices.length === 0 ? (
+              <div className="rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
+                No invoice has been assigned to {selectedChild?.name ?? "this child"} yet.
+              </div>
+            ) : (
+              childInvoices.map((invoice) => {
+                const balance = invoice.balance ?? invoice.amount;
+                const billPaid = invoice.billPaid ?? false;
+                const installmentAmount = Math.min(
+                  invoice.minimumInstallmentAmount ?? balance,
+                  balance,
+                );
+                return (
+                  <article
+                    key={invoice._id}
+                    className="rounded-2xl border border-navy/10 p-5"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-medium text-foreground">
+                          {[invoice.term?.name, invoice.term?.session?.name]
+                            .filter(Boolean)
+                            .join(" · ") || "School fee invoice"}
+                        </h3>
+                        <p className="mt-1 text-sm text-foreground/60">
+                          {[
+                            invoice.classSection?.classLevel?.name,
+                            invoice.classSection?.name,
+                          ]
+                            .filter(Boolean)
+                            .join(" ")}
+                        </p>
+                      </div>
+                      <HugeiconsIcon
+                        icon={Coins01Icon}
+                        size={21}
+                        className="text-blue"
+                      />
+                    </div>
+                    <div className="mt-5 grid gap-3 text-sm text-foreground/70 sm:grid-cols-4">
+                      <p>Total: {formatNaira(invoice.amount)}</p>
+                      <p>Paid: {formatNaira(invoice.paidAmount ?? 0)}</p>
+                      <p>Balance: {formatNaira(balance)}</p>
+                      <p>
+                        Due:{" "}
+                        {invoice.dueDate
+                          ? new Date(invoice.dueDate).toLocaleDateString()
+                          : "Not set"}
+                      </p>
+                    </div>
+                    {balance > 0 ? (
+                      <div className="mt-5 flex flex-wrap gap-3">
+                        <button
+                          onClick={() => startPayment(invoice, balance)}
+                          className="rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
+                        >
+                          Pay full amount
+                        </button>
+                        {invoice.allowInstallments && (
+                          <button
+                            onClick={() =>
+                              startPayment(invoice, installmentAmount)
+                            }
+                            className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy hover:bg-blue-light"
+                          >
+                            Pay installment of {formatNaira(installmentAmount)}
+                          </button>
+                        )}
+                      </div>
+                    ) : billPaid ? (
+                      <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[#3F7A5B]">
+                        <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} />
+                        Paid in full
+                      </div>
+                    ) : (
+                      <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
+                        No payment due.
+                      </div>
+                    )}
+                  </article>
+                );
+              })
+            )}
+          </div>
+        </section>
       )}
       <div>
         <h2 className="text-base font-medium text-foreground">
@@ -180,7 +277,7 @@ export default function ParentFeesPage() {
                     />
                   </td>
                 </tr>
-              ) : payments.length === 0 ? (
+            ) : childPayments.length === 0 ? (
                 <tr>
                   <td
                     colSpan={4}
@@ -190,7 +287,7 @@ export default function ParentFeesPage() {
                   </td>
                 </tr>
               ) : (
-                payments.map((payment) => (
+                childPayments.map((payment) => (
                   <tr key={payment._id} className="text-sm">
                     <td className="px-6 py-4 font-medium text-foreground">
                       {payment.invoice?.student?.fullName ?? "Student"}
@@ -202,9 +299,13 @@ export default function ParentFeesPage() {
                       {formatNaira(payment.amount)}
                     </td>
                     <td className="px-6 py-4">
-                      <button aria-label="Download receipt" className="text-blue">
+                      <a
+                        href={`/api/parent/payments/${payment._id}/receipt`}
+                        aria-label="Download receipt"
+                        className="text-blue"
+                      >
                         <HugeiconsIcon icon={Download01Icon} size={18} />
-                      </button>
+                      </a>
                     </td>
                   </tr>
                 ))

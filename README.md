@@ -47,7 +47,7 @@ Open [http://localhost:3000](http://localhost:3000).
 
 ## Main roles
 
-- Admin: manages students, staff, parents, classes, academics, announcements, public news, fees, attendance overview, assignments, and timetable.
+- Admin: manages students, staff, parents, academics, operations, finance, communications, and settings.
 - Staff: views assigned classes, records attendance for classes they head, enters results, publishes assignments, and manages timetable entries for subjects they teach.
 - Student: views profile, classes, attendance, results, assignments, timetable, announcements, messages placeholder, and payment history.
 - Parent: views children, attendance, results, fees, and announcements.
@@ -348,7 +348,7 @@ NewsPost = public homepage/news content
 Admins publish public news from:
 
 ```txt
-Dashboard → Admin → News
+Dashboard → Admin → Communications → News
 ```
 
 A news post includes:
@@ -387,16 +387,81 @@ The homepage keeps short preview sections for Academics and Admissions, while fu
 
 These pages currently use static website copy and existing images from the `public` folder. They do not need admin management yet unless the school wants non-technical admins to edit website copy from the dashboard later.
 
-### 15. Fees and payment records
+### 15. Finance, fees, invoices, and payment records
 
-Invoices are stored per student:
+Finance starts with an admin fee schedule. Admin defines fees by:
+
+- academic session
+- term
+- class
+- amount
+- due date
+- whether installments are allowed
+- minimum installment amount, if installments are allowed
+
+The academic session is selected through the term:
+
+```txt
+Term.session → AcademicSession
+ClassFee.term → Term
+ClassFee.classSection → ClassSection
+```
+
+Admin manages this from:
+
+```txt
+Dashboard → Admin → Finance → Fee structure
+```
+
+Finance uses one main admin sidebar entry so the admin sidebar does not become overcrowded. Inside the Finance page, the internal finance navigation is:
+
+- Overview
+- Fee structure
+- Student invoices
+- Transactions
+- Outstanding payments
+- Financial reports
+
+The same module-navigation pattern is used elsewhere in admin:
+
+- Academics: setup, classes, assignments, timetable, and subject teachers
+- Operations: attendance and promotions
+- Communications: announcements, new announcement, and public news
+
+The main admin sidebar stays focused on major areas:
+
+- Overview
+- Students
+- Staff
+- Parents
+- Academics
+- Operations
+- Finance
+- Communication
+- Settings
+
+Saving a fee schedule keeps it as a draft/setup record. Publishing a fee schedule generates invoices for active students in that class and term:
+
+```txt
+Enrollment.classSection = selected class
+Enrollment.term = selected term
+Enrollment.status = ACTIVE
+```
+
+For each matching student, the backend creates or updates an invoice:
 
 ```txt
 Invoice.student → Student
 Invoice.term → Term
+Invoice.classSection → ClassSection
 Invoice.amount
+Invoice.dueDate
+Invoice.allowInstallments
+Invoice.minimumInstallmentAmount
 Invoice.status
 ```
+
+Invoices are unique per student and term, so the same child should not receive duplicate invoices for the same term. If a fee schedule is published again, unpaid invoices can be updated with the new amount, due date, and installment settings. Paid invoices are left alone for accounting safety.
 
 Payments are stored against invoices:
 
@@ -405,9 +470,14 @@ Payment.invoice → Invoice
 Payment.amount
 Payment.paystackReference
 Payment.paidAt
+Payment.channel
+Payment.paymentMethod
+Payment.depositorName
+Payment.notes
+Payment.verificationStatus
 ```
 
-Student and parent dashboards calculate outstanding balances from:
+Student, parent, and admin dashboards calculate outstanding balances from:
 
 ```txt
 invoice amount - recorded payments
@@ -415,7 +485,38 @@ invoice amount - recorded payments
 
 If no invoice exists yet, the UI shows that no bill has been assigned. It should not show "Paid in full" unless an actual invoice exists and its balance is zero.
 
-Gateway payment collection is intentionally left for the final payment integration phase.
+Admin finance overview shows:
+
+- total collected from actual payment records
+- outstanding balances
+- overdue balances
+- invoice records with student, class, term, amount, paid amount, balance, due date, and status
+- session by session totals for billed fees, collected fees, outstanding balances, overdue balances, invoices, and collection rate
+- illustrative dashboard figures for quick visual comparison across sessions
+
+Parents can:
+
+- select a linked child
+- view that child's invoices
+- see total, paid amount, balance, due date, and term/session
+- choose full payment
+- choose installment payment only when the invoice allows installments
+- view payment history
+- download PDF receipts for recorded payments
+
+Manual payments are supported for Nigerian school operations where parents may pay by bank transfer, cash at the bursary, POS, cheque, or another offline method. Admin or bursary staff can record a verified manual payment from Finance → Student invoices by entering:
+
+- payment method
+- payment reference, teller number, or transaction reference
+- depositor name
+- amount
+- notes
+
+Admin-recorded manual payments are marked as verified immediately, so they reduce the invoice balance and count as collected fees as soon as they are saved.
+
+Gateway payment collection is intentionally left for the final payment integration phase. The parent payment endpoint currently validates invoice ownership, balance, full payment, and installment rules, then returns a clear "payment gateway not configured" response. The final integration should connect that validated request to Paystack, Flutterwave, Stripe, or the chosen provider, then create `Payment` records after successful verification/webhook confirmation.
+
+Later, when file storage is configured, parent-submitted manual payment proof can be added. That flow should let parents submit bank transfer details and upload proof, then let admin/bursary verify or reject it. Use managed storage such as Cloudinary, S3/R2, Vercel Blob, Firebase Storage, or another object storage provider before enabling proof uploads in production.
 
 ## Implemented dashboard work
 
@@ -430,6 +531,7 @@ Gateway payment collection is intentionally left for the final payment integrati
 - Added admin academic setup pages for sessions, terms, subjects, subject teachers, assignments, and timetable.
 - Added admin student pagination and database indexes for larger school sizes.
 - Fixed admin student action dropdown clipping by rendering the menu above table overflow.
+- Refactored admin navigation into major sidebar modules with internal tab/grid navigation to reduce sidebar crowding.
 
 ## Scale notes
 

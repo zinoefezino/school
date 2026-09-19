@@ -71,7 +71,7 @@ export default function StudentsPage() {
         </div>
         <div className="flex flex-wrap gap-2">
           <a
-            href="/dashboard/admin/students/promote"
+            href="/dashboard/admin/operations/promotions"
             className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy hover:bg-blue-light"
           >
             Promote student

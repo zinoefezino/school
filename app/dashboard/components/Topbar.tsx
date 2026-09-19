@@ -16,6 +16,7 @@ const titles: Record<string, string> = {
   "/dashboard/admin/timetable": "Timetable",
   "/dashboard/admin/attendance": "Attendance",
   "/dashboard/admin/fees": "Fees",
+  "/dashboard/admin/finance": "Finance",
   "/dashboard/admin/announcements": "Announcements",
   "/dashboard/admin/news": "News",
   "/dashboard/admin/settings": "Settings",
@@ -35,9 +36,18 @@ function formatLastLogin(value?: string) {
   return `Last login: ${new Date(value).toLocaleString()}`;
 }
 
+function titleFor(pathname: string) {
+  if (pathname.startsWith("/dashboard/admin/finance")) return "Finance";
+  if (pathname.startsWith("/dashboard/admin/operations")) return "Operations";
+  if (pathname.startsWith("/dashboard/admin/communications"))
+    return "Communications";
+  if (pathname.startsWith("/dashboard/admin/academics")) return "Academics";
+  return titles[pathname] ?? "Dashboard";
+}
+
 export default function Topbar({ onMenuClick }: TopbarProps) {
   const pathname = usePathname();
-  const title = titles[pathname] ?? "Dashboard";
+  const title = titleFor(pathname);
   const [user, setUser] = useState<CurrentUser | null>(null);
 
   useEffect(() => {

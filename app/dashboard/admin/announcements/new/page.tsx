@@ -63,7 +63,7 @@ export default function NewAnnouncementPage() {
   return (
     <div className="max-w-3xl">
       <a
-        href="/dashboard/admin/announcements"
+        href="/dashboard/admin/communications/announcements"
         className="flex items-center gap-1.5 text-sm font-medium text-blue"
       >
         <HugeiconsIcon icon={ArrowLeft02Icon} size={16} />

@@ -11,13 +11,12 @@ import {
   TeacherIcon,
   LocationUser01Icon,
   Book02Icon,
-  Calendar03Icon,
   Coins01Icon,
   Megaphone01Icon,
   Setting06Icon,
   Logout01Icon,
   Cancel01Icon,
-  NewspaperIcon,
+  WorkflowCircle02Icon,
   PanelLeftCloseIcon,
   PanelLeftOpenIcon,
 } from "@hugeicons/core-free-icons";
@@ -31,37 +30,21 @@ const navItems = [
     href: "/dashboard/admin/parents/new",
     icon: LocationUser01Icon,
   },
-  { label: "Classes", href: "/dashboard/admin/classes", icon: Book02Icon },
   {
     label: "Academics",
     href: "/dashboard/admin/academics",
     icon: Book02Icon,
   },
   {
-    label: "Assignments",
-    href: "/dashboard/admin/assignments",
-    icon: Book02Icon,
+    label: "Operations",
+    href: "/dashboard/admin/operations",
+    icon: WorkflowCircle02Icon,
   },
+  { label: "Finance", href: "/dashboard/admin/finance", icon: Coins01Icon },
   {
-    label: "Timetable",
-    href: "/dashboard/admin/timetable",
-    icon: Calendar03Icon,
-  },
-  {
-    label: "Attendance",
-    href: "/dashboard/admin/attendance",
-    icon: Calendar03Icon,
-  },
-  { label: "Fees", href: "/dashboard/admin/fees", icon: Coins01Icon },
-  {
-    label: "Announcements",
-    href: "/dashboard/admin/announcements",
+    label: "Communication",
+    href: "/dashboard/admin/communications",
     icon: Megaphone01Icon,
-  },
-  {
-    label: "News",
-    href: "/dashboard/admin/news",
-    icon: NewspaperIcon,
   },
 ];
 
@@ -86,11 +69,32 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   });
   const [collapsed, setCollapsed] = useState(false);
 
-  const activeIndex = navItems.findIndex((item) =>
-    item.href === "/dashboard/admin"
-      ? pathname === item.href
-      : pathname.startsWith(item.href),
-  );
+  const activeIndex = navItems.findIndex((item) => {
+    if (item.href === "/dashboard/admin") return pathname === item.href;
+    if (item.href === "/dashboard/admin/academics") {
+      return [
+        "/dashboard/admin/academics",
+        "/dashboard/admin/classes",
+        "/dashboard/admin/assignments",
+        "/dashboard/admin/timetable",
+      ].some((path) => pathname.startsWith(path));
+    }
+    if (item.href === "/dashboard/admin/operations") {
+      return [
+        "/dashboard/admin/operations",
+        "/dashboard/admin/attendance",
+        "/dashboard/admin/students/promote",
+      ].some((path) => pathname.startsWith(path));
+    }
+    if (item.href === "/dashboard/admin/communications") {
+      return [
+        "/dashboard/admin/communications",
+        "/dashboard/admin/announcements",
+        "/dashboard/admin/news",
+      ].some((path) => pathname.startsWith(path));
+    }
+    return pathname.startsWith(item.href);
+  });
 
   const closeOnMobile = () => {
     if (window.innerWidth < 1024) {

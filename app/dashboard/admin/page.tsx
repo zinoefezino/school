@@ -22,12 +22,17 @@ const quickActions = [
   { label: "Add staff", href: "/dashboard/admin/staff/new", icon: TeacherIcon },
   {
     label: "Post announcement",
-    href: "/dashboard/admin/announcements/new",
+    href: "/dashboard/admin/communications/announcements/new",
     icon: Megaphone01Icon,
   },
   {
+    label: "Finance overview",
+    href: "/dashboard/admin/finance",
+    icon: Coins01Icon,
+  },
+  {
     label: "Post news",
-    href: "/dashboard/admin/news",
+    href: "/dashboard/admin/communications/news",
     icon: NewspaperIcon,
   },
 ];

@@ -98,7 +98,7 @@ export default function AdminAnnouncementsPage() {
           </h2>
         </div>
         <a
-          href="/dashboard/admin/announcements/new"
+          href="/dashboard/admin/communications/announcements/new"
           className="flex items-center gap-2 rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700"
         >
           <HugeiconsIcon icon={Add01Icon} size={18} />
