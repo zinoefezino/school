@@ -20,6 +20,8 @@ import {
   Cancel01Icon,
   ChevronDownIcon,
   Setting06Icon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
 } from "@hugeicons/core-free-icons";
 import {
   studentReadResultTermsStorageKey,
@@ -129,6 +131,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     router.push("/portal/login");
   };
   const [badges, setBadges] = useState({ announcements: 0, results: 0 });
+  const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
     const readArray = (key: string) => {
@@ -209,7 +212,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     return () => {
       window.removeEventListener("resize", updateIndicator);
     };
-  }, [pathname, openGroup]);
+  }, [pathname, openGroup, collapsed]);
 
   const renderLink = (item: NavItem, indent = false) => {
     const isActive = pathname === item.href;
@@ -224,21 +227,30 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         onClick={() => {
           closeOnMobile();
         }}
+        title={collapsed ? item.label : undefined}
         className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 lg:hover:bg-transparent ${
           isActive
             ? "text-white/60 lg:font-semibold lg:text-navy"
             : "text-white/60"
-        } ${indent ? "ml-4" : ""}`}
+        } ${indent && !collapsed ? "ml-4" : ""} ${collapsed ? "lg:justify-center lg:pl-0" : ""}`}
       >
         <HugeiconsIcon icon={item.icon} size={20} />
-        <span>{item.label}</span>
+        <span className={collapsed ? "lg:hidden" : ""}>{item.label}</span>
         {item.label === "Announcements" && badges.announcements > 0 && (
-          <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+          <span
+            className={`rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white ${
+              collapsed ? "lg:absolute lg:right-1 lg:top-1" : "ml-auto mr-3"
+            }`}
+          >
             {badges.announcements}
           </span>
         )}
         {item.label === "Results" && badges.results > 0 && (
-          <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+          <span
+            className={`rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white ${
+              collapsed ? "lg:absolute lg:right-1 lg:top-1" : "ml-auto mr-3"
+            }`}
+          >
             {badges.results}
           </span>
         )}
@@ -256,18 +268,34 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-transform duration-300 ease-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-[width,transform] duration-300 ease-out lg:static lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${collapsed ? "lg:w-20" : "lg:w-64"}`}
       >
-        <div className="flex items-center justify-between px-6 py-5">
+        <div className="flex items-center justify-between px-6 py-5 lg:px-4">
           <Link
             href="/"
             onClick={closeOnMobile}
             className="flex items-center gap-2.5"
           >
-            <span className="text-base font-medium text-white">School</span>
+            <span
+              className={`text-base font-medium text-white ${collapsed ? "lg:hidden" : ""}`}
+            >
+              School
+            </span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((current) => !current)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden rounded-full p-1.5 text-white/60 hover:bg-white/5 hover:text-white lg:block"
+          >
+            <HugeiconsIcon
+              icon={collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon}
+              size={18}
+            />
+          </button>
 
           <button
             onClick={onClose}
@@ -278,7 +306,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav ref={navRef} className="relative mt-4 flex flex-1 flex-col pl-4">
+        <nav
+          ref={navRef}
+          className={`relative mt-4 flex flex-1 flex-col ${collapsed ? "lg:pl-3" : "pl-4"}`}
+        >
           <div
             className={`pointer-events-none absolute left-0 right-0 z-0 hidden rounded-l-full bg-white transition-[transform,height,opacity] duration-300 ease-out lg:block ${
               indicator.visible ? "opacity-100" : "opacity-0"
@@ -306,18 +337,21 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
               <div key={group.label} className="relative z-10">
                 <button
                   onClick={() => setOpenGroup(isOpen ? null : group.label)}
+                  title={collapsed ? group.label : undefined}
                   className={`mr-4 flex w-full items-center justify-between rounded-full py-3 pl-4 pr-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 ${
                     groupActive ? "text-white" : "text-white/60"
-                  }`}
+                  } ${collapsed ? "lg:justify-center lg:pl-0 lg:pr-0" : ""}`}
                 >
                   <span className="flex items-center gap-3">
                     <HugeiconsIcon icon={group.icon} size={20} />
-                    {group.label}
+                    <span className={collapsed ? "lg:hidden" : ""}>
+                      {group.label}
+                    </span>
                   </span>
                   <HugeiconsIcon
                     icon={ChevronDownIcon}
                     size={16}
-                    className={`transition-transform ${isOpen ? "rotate-180" : ""}`}
+                    className={`transition-transform ${isOpen ? "rotate-180" : ""} ${collapsed ? "lg:hidden" : ""}`}
                   />
                 </button>
 
@@ -336,10 +370,11 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
         <div className="border-t border-white/10 px-3 py-4">
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
+            title={collapsed ? "Log out" : undefined}
+            className={`flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <HugeiconsIcon icon={Logout01Icon} size={20} />
-            Log out
+            <span className={collapsed ? "lg:hidden" : ""}>Log out</span>
           </button>
         </div>
       </aside>

@@ -18,6 +18,8 @@ import {
   Logout01Icon,
   Cancel01Icon,
   NewspaperIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
 } from "@hugeicons/core-free-icons";
 
 const navItems = [
@@ -82,6 +84,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     height: 0,
     visible: false,
   });
+  const [collapsed, setCollapsed] = useState(false);
 
   const activeIndex = navItems.findIndex((item) =>
     item.href === "/dashboard/admin"
@@ -121,7 +124,7 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     return () => {
       window.removeEventListener("resize", updateIndicator);
     };
-  }, [activeIndex, pathname]);
+  }, [activeIndex, pathname, collapsed]);
 
   return (
     <>
@@ -133,18 +136,34 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-transform duration-300 ease-out lg:static lg:translate-x-0 ${
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-[width,transform] duration-300 ease-out lg:static lg:translate-x-0 ${
           open ? "translate-x-0" : "-translate-x-full"
-        }`}
+        } ${collapsed ? "lg:w-20" : "lg:w-64"}`}
       >
-        <div className="flex items-center justify-between px-6 py-5">
+        <div className="flex items-center justify-between px-6 py-5 lg:px-4">
           <Link
             href="/"
             onClick={closeOnMobile}
             className="flex items-center gap-2.5"
           >
-            <span className="text-base font-medium text-white">School</span>
+            <span
+              className={`text-base font-medium text-white ${collapsed ? "lg:hidden" : ""}`}
+            >
+              School
+            </span>
           </Link>
+
+          <button
+            type="button"
+            onClick={() => setCollapsed((current) => !current)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden rounded-full p-1.5 text-white/60 hover:bg-white/5 hover:text-white lg:block"
+          >
+            <HugeiconsIcon
+              icon={collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon}
+              size={18}
+            />
+          </button>
 
           <button
             onClick={onClose}
@@ -155,7 +174,10 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           </button>
         </div>
 
-        <nav ref={navRef} className="relative mt-4 flex flex-1 flex-col pl-4">
+        <nav
+          ref={navRef}
+          className={`relative mt-4 flex flex-1 flex-col ${collapsed ? "lg:pl-3" : "pl-4"}`}
+        >
           <div
             className={`pointer-events-none absolute left-0 right-0 z-0 hidden rounded-l-full bg-white transition-[transform,height,opacity] duration-300 ease-out lg:block ${
               indicator.visible ? "opacity-100" : "opacity-0"
@@ -185,14 +207,17 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
                 }}
                 href={item.href}
                 onClick={closeOnMobile}
+                title={collapsed ? item.label : undefined}
                 className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white lg:mr-0 lg:hover:bg-transparent ${
                   isActive
                     ? "text-white/60 lg:font-semibold lg:text-navy"
                     : "text-white/60"
-                }`}
+                } ${collapsed ? "lg:justify-center lg:pl-0" : ""}`}
               >
                 <HugeiconsIcon icon={item.icon} size={20} />
-                <span>{item.label}</span>
+                <span className={collapsed ? "lg:hidden" : ""}>
+                  {item.label}
+                </span>
               </Link>
             );
           })}
@@ -202,18 +227,20 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
           <Link
             href="/dashboard/admin/settings"
             onClick={closeOnMobile}
-            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
+            title={collapsed ? "Settings" : undefined}
+            className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <HugeiconsIcon icon={Setting06Icon} size={20} />
-            Settings
+            <span className={collapsed ? "lg:hidden" : ""}>Settings</span>
           </Link>
 
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white"
+            title={collapsed ? "Log out" : undefined}
+            className={`flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 transition-colors duration-200 ease-out hover:bg-white/5 hover:text-white ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <HugeiconsIcon icon={Logout01Icon} size={20} />
-            Log out
+            <span className={collapsed ? "lg:hidden" : ""}>Log out</span>
           </button>
         </div>
       </aside>

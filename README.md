@@ -63,7 +63,7 @@ The app uses signed HTTP only cookies for login sessions. Session tokens include
 - role
 - expiry time
 
-On successful login, the user record stores `lastLoginAt`. Each dashboard topbar displays this subtly in italic text so users can notice when their account was last accessed.
+On successful login, the user record stores `lastLoginAt`. Desktop dashboard topbars display this subtly in italic text, while mobile users can see the same account and last-login information from Settings.
 
 The cookie is:
 

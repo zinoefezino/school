@@ -14,6 +14,8 @@ import {
   Megaphone01Icon,
   Setting06Icon,
   StudentsIcon,
+  PanelLeftCloseIcon,
+  PanelLeftOpenIcon,
 } from "@hugeicons/core-free-icons";
 
 const navItems = [
@@ -57,6 +59,7 @@ export default function ParentSidebar({
   const navRef = useRef<HTMLElement | null>(null);
   const itemRefs = useRef<Record<string, HTMLAnchorElement | null>>({});
   const [unreadAnnouncements, setUnreadAnnouncements] = useState(0);
+  const [collapsed, setCollapsed] = useState(false);
   const indicator = useRef({ top: 0, height: 0, visible: false });
   const indicatorRef = useRef<HTMLDivElement | null>(null);
   useEffect(() => {
@@ -95,7 +98,7 @@ export default function ParentSidebar({
       )
       .then((data) => setUnreadAnnouncements(data.announcements ?? 0))
       .catch(() => setUnreadAnnouncements(0));
-  }, [pathname]);
+  }, [pathname, collapsed]);
   return (
     <>
       <div
@@ -103,16 +106,27 @@ export default function ParentSidebar({
         onClick={onClose}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-transform lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"}`}
+        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-[width,transform] lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-20" : "lg:w-64"}`}
       >
-        <div className="flex items-center justify-between px-6 py-5">
+        <div className="flex items-center justify-between px-6 py-5 lg:px-4">
           <Link
             href="/"
             onClick={closeOnMobile}
             className="text-base font-medium text-white"
           >
-            School
+            <span className={collapsed ? "lg:hidden" : ""}>School</span>
           </Link>
+          <button
+            type="button"
+            onClick={() => setCollapsed((current) => !current)}
+            aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+            className="hidden rounded-full p-1.5 text-white/60 hover:bg-white/5 hover:text-white lg:block"
+          >
+            <HugeiconsIcon
+              icon={collapsed ? PanelLeftOpenIcon : PanelLeftCloseIcon}
+              size={18}
+            />
+          </button>
           <button
             onClick={onClose}
             aria-label="Close menu"
@@ -121,7 +135,10 @@ export default function ParentSidebar({
             <HugeiconsIcon icon={Cancel01Icon} size={22} />
           </button>
         </div>
-        <nav ref={navRef} className="relative mt-4 flex flex-1 flex-col pl-4">
+        <nav
+          ref={navRef}
+          className={`relative mt-4 flex flex-1 flex-col ${collapsed ? "lg:pl-3" : "pl-4"}`}
+        >
           <div
             ref={indicatorRef}
             className="pointer-events-none absolute left-0 right-0 z-0 hidden rounded-l-full bg-white opacity-0 transition-[transform,height,opacity] duration-300 lg:block"
@@ -146,13 +163,22 @@ export default function ParentSidebar({
                 }}
                 href={item.href}
                 onClick={closeOnMobile}
-                className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium ${active ? "text-white/60 lg:font-semibold lg:text-navy" : "text-white/60 hover:bg-white/5 hover:text-white"}`}
+                title={collapsed ? item.label : undefined}
+                className={`relative z-10 mr-4 flex items-center gap-3 rounded-full py-3 pl-4 text-sm font-medium ${active ? "text-white/60 lg:font-semibold lg:text-navy" : "text-white/60 hover:bg-white/5 hover:text-white"} ${collapsed ? "lg:justify-center lg:pl-0" : ""}`}
               >
                 <HugeiconsIcon icon={item.icon} size={20} />
-                <span>{item.label}</span>
+                <span className={collapsed ? "lg:hidden" : ""}>
+                  {item.label}
+                </span>
                 {item.label === "Announcements" &&
                   unreadAnnouncements > 0 && (
-                    <span className="ml-auto mr-3 rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white">
+                    <span
+                      className={`rounded-full bg-blue px-2 py-0.5 text-[10px] font-semibold leading-4 text-white ${
+                        collapsed
+                          ? "lg:absolute lg:right-1 lg:top-1"
+                          : "ml-auto mr-3"
+                      }`}
+                    >
                       {unreadAnnouncements}
                     </span>
                   )}
@@ -164,17 +190,19 @@ export default function ParentSidebar({
           <Link
             href="/dashboard/parent/settings"
             onClick={closeOnMobile}
-            className="flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+            title={collapsed ? "Settings" : undefined}
+            className={`flex items-center gap-3 rounded-full px-4 py-2.5 text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <HugeiconsIcon icon={Setting06Icon} size={20} />
-            Settings
+            <span className={collapsed ? "lg:hidden" : ""}>Settings</span>
           </Link>
           <button
             onClick={logout}
-            className="flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white"
+            title={collapsed ? "Log out" : undefined}
+            className={`flex w-full items-center gap-3 rounded-full px-4 py-2.5 text-left text-sm font-medium text-white/60 hover:bg-white/5 hover:text-white ${collapsed ? "lg:justify-center lg:px-0" : ""}`}
           >
             <HugeiconsIcon icon={Logout01Icon} size={20} />
-            Log out
+            <span className={collapsed ? "lg:hidden" : ""}>Log out</span>
           </button>
         </div>
       </aside>

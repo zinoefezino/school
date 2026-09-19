@@ -8,6 +8,7 @@ import {
   Notification01Icon,
 } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import AccountSummary from "../../components/AccountSummary";
 
 type Settings = {
   schoolName: string;
@@ -80,6 +81,7 @@ export default function SettingsPage() {
         </p>
         <h2 className="mt-1 text-xl font-medium text-foreground">Settings</h2>
       </div>
+      <AccountSummary />
       <form
         onSubmit={saveSettings}
         className="rounded-2xl border border-navy/10 bg-white p-6"
