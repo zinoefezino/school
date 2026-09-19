@@ -62,7 +62,7 @@ export default async function LatestNews() {
               <Link
                 key={post._id}
                 href={`/news/${post.slug}`}
-                className="group overflow-hidden rounded-3xl bg-white shadow-sm ring-1 ring-navy/10 transition-transform hover:-translate-y-1"
+                className="group overflow-hidden rounded-3xl bg-white ring-1 ring-navy/10 transition-transform hover:-translate-y-1"
               >
                 <div className="relative h-52 bg-blue-light">
                   {post.coverImageUrl ? (
