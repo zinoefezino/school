@@ -13,13 +13,16 @@ type ChildSummary = {
   id: string;
   name: string;
   classSection: string;
-  balance: number;
+  balance: number | null;
+  hasBill?: boolean;
+  billPaid?: boolean;
 };
 type Invoice = {
   _id?: string;
   amount: number;
   paidAmount?: number;
   balance?: number;
+  billPaid?: boolean;
   status: string;
   student?: { _id?: string; fullName?: string };
   term?: { name?: string; session?: { name?: string } };
@@ -36,6 +39,10 @@ type Payment = {
 
 function formatNaira(amount: number) {
   return `₦${amount.toLocaleString("en-NG")}`;
+}
+
+function formatMaybeNaira(amount: number | null | undefined) {
+  return typeof amount === "number" ? formatNaira(amount) : "No bill";
 }
 
 export default function ParentFeesPage() {
@@ -94,7 +101,8 @@ export default function ParentFeesPage() {
                 item.student?.fullName === child.name,
             );
             const hasInvoice = Boolean(invoice);
-            const balance = invoice?.balance ?? child.balance;
+            const balance = invoice?.balance ?? child.balance ?? null;
+            const billPaid = invoice?.billPaid ?? child.billPaid ?? false;
             const termName = invoice?.term?.name ?? "No active invoice";
             const sessionName = invoice?.term?.session?.name ?? "";
             return (
@@ -120,7 +128,7 @@ export default function ParentFeesPage() {
                   />
                 </div>
                 <p className="mt-6 text-3xl font-medium text-foreground">
-                  {formatNaira(balance)}
+                  {formatMaybeNaira(balance)}
                 </p>
                 <p className="mt-1 text-sm text-foreground/60">
                   Outstanding balance
@@ -129,14 +137,18 @@ export default function ParentFeesPage() {
                   <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
                     No bill has been assigned yet.
                   </div>
-                ) : balance > 0 ? (
+                ) : balance !== null && balance > 0 ? (
                   <button className="mt-5 w-full rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
                     Pay {formatNaira(balance)}
                   </button>
-                ) : (
+                ) : billPaid ? (
                   <div className="mt-5 flex items-center gap-2 text-sm font-medium text-[#3F7A5B]">
                     <HugeiconsIcon icon={CheckmarkCircle02Icon} size={18} />
                     Paid in full
+                  </div>
+                ) : (
+                  <div className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
+                    No payment due.
                   </div>
                 )}
               </article>

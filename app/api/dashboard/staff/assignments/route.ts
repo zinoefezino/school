@@ -5,6 +5,9 @@ import { getSession } from "../../../../../lib/session";
 import Staff from "../../../../../models/Staff";
 import Assignment from "../../../../../models/Assignment";
 import TeachingAssignment from "../../../../../models/TeachingAssignment";
+import "../../../../../models/Subject";
+import "../../../../../models/ClassSection";
+import "../../../../../models/ClassLevel";
 
 async function getStaff(userId: string) {
   return Staff.findOne({ user: userId }).select("_id").lean();

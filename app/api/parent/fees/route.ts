@@ -5,6 +5,9 @@ import {
 } from "../../../../lib/parent-access";
 import Invoice from "../../../../models/Invoice";
 import Payment from "../../../../models/Payment";
+import "../../../../models/Term";
+import "../../../../models/AcademicSession";
+import "../../../../models/Student";
 
 export async function GET() {
   try {
@@ -44,11 +47,15 @@ export async function GET() {
     const invoicesWithBalance = invoices.map((invoice) => {
       const paidAmount = paidByInvoice.get(invoice._id.toString()) ?? 0;
       const balance = Math.max(invoice.amount - paidAmount, 0);
+      const isActuallyPaid =
+        invoice.status === "PAID" ||
+        (invoice.amount > 0 && paidAmount >= invoice.amount);
       return {
         ...invoice,
         paidAmount,
         balance,
-        status: balance <= 0 ? "PAID" : invoice.status,
+        billPaid: isActuallyPaid,
+        status: isActuallyPaid ? "PAID" : invoice.status,
       };
     });
     return NextResponse.json({ invoices: invoicesWithBalance, payments });

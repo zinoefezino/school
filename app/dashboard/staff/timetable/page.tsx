@@ -20,7 +20,6 @@ const days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"];
 
 export default function StaffTimetablePage() {
   const [classes, setClasses] = useState<StaffClass[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
   const [entries, setEntries] = useState<Entry[]>([]);
   const [selectedClassId, setSelectedClassId] = useState("");
@@ -40,7 +39,6 @@ export default function StaffTimetablePage() {
     ]);
     const nextClasses = classData.classes ?? [];
     setClasses(nextClasses);
-    setSubjects(classData.subjects ?? []);
     setTerms(lookupData.terms ?? []);
     setEntries(timetableData.timetable ?? []);
     setSelectedClassId((current) =>
@@ -90,10 +88,7 @@ export default function StaffTimetablePage() {
 
   if (loading) return <LoadingState label="Loading timetable..." />;
   const selectedClass = classes.find((item) => item.id === selectedClassId);
-  const availableSubjects =
-    selectedClass?.subjects && selectedClass.subjects.length > 0
-      ? selectedClass.subjects
-      : subjects;
+  const availableSubjects = selectedClass?.subjects ?? [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">

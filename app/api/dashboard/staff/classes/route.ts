@@ -6,6 +6,8 @@ import ClassSection from "../../../../../models/ClassSection";
 import Enrollment from "../../../../../models/Enrollment";
 import ResultSubmission from "../../../../../models/ResultSubmission";
 import TeachingAssignment from "../../../../../models/TeachingAssignment";
+import "../../../../../models/Subject";
+import "../../../../../models/ClassLevel";
 
 export async function GET() {
   const session = await getSession();

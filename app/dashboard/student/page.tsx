@@ -21,6 +21,7 @@ type StudentOverview = {
   admissionNumber: string;
   dateOfBirth: string;
   gender?: "male" | "female";
+  photoUrl?: string;
   attendance: number;
   feesBalance: number | null;
   average: number | null;
@@ -32,6 +33,11 @@ type StudentOverview = {
     classSection?: { name?: string; classLevel?: { name?: string } };
   };
   academicStatus?: "ACTIVE" | "PROMOTED" | "COMPLETED" | "UNASSIGNED";
+  guardian?: {
+    fullName?: string;
+    phone?: string;
+    user?: { email?: string };
+  } | null;
 };
 type Announcement = { title: string; publishedAt: string };
 
@@ -75,6 +81,11 @@ export default function StudentDashboard() {
   const details = [
     { label: "Student", value: data.fullName, icon: UserIcon },
     {
+      label: "Parent",
+      value: data.guardian?.fullName ?? "Not assigned",
+      icon: UserIcon,
+    },
+    {
       label: "Class",
       value: data.enrollment?.classSection
         ? `${data.enrollment.classSection.classLevel?.name ?? ""} ${data.enrollment.classSection.name ?? ""}`.trim()
@@ -113,6 +124,7 @@ export default function StudentDashboard() {
           <StudentAvatar
             gender={data.gender}
             name={data.fullName}
+            photoUrl={data.photoUrl}
             size="md"
           />
           <div>

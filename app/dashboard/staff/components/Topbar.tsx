@@ -19,7 +19,16 @@ const titles: Record<string, string> = {
 interface TopbarProps {
   onMenuClick: () => void;
 }
-type CurrentUser = { displayName: string; initials: string };
+type CurrentUser = {
+  displayName: string;
+  initials: string;
+  lastLoginAt?: string;
+};
+
+function formatLastLogin(value?: string) {
+  if (!value) return "Last login not recorded";
+  return `Last login: ${new Date(value).toLocaleString()}`;
+}
 
 export default function StaffTopbar({ onMenuClick }: TopbarProps) {
   const pathname = usePathname();
@@ -51,8 +60,13 @@ export default function StaffTopbar({ onMenuClick }: TopbarProps) {
           <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-sm font-medium text-navy">
             {user?.initials ?? "T"}
           </span>
-          <span className="hidden text-sm font-medium text-foreground sm:block">
-            {user?.displayName ?? "Staff"}
+          <span className="hidden sm:block">
+            <span className="block text-sm font-medium text-foreground">
+              {user?.displayName ?? "Staff"}
+            </span>
+            <span className="block text-xs italic text-foreground/45">
+              {formatLastLogin(user?.lastLoginAt)}
+            </span>
           </span>
         </div>
       </div>

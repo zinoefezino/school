@@ -7,15 +7,25 @@ import Enrollment from "../../../../../models/Enrollment";
 import Assessment from "../../../../../models/Assessment";
 import ResultSubmission from "../../../../../models/ResultSubmission";
 import TeachingAssignment from "../../../../../models/TeachingAssignment";
+import "../../../../../models/Student";
 
-async function getStaffContext(userId: string, classSectionId: string) {
-  if (!Types.ObjectId.isValid(classSectionId)) return null;
+async function getStaffContext(
+  userId: string,
+  classSectionId: string,
+  subjectId: string,
+) {
+  if (
+    !Types.ObjectId.isValid(classSectionId) ||
+    !Types.ObjectId.isValid(subjectId)
+  )
+    return null;
   const staff = await Staff.findOne({ user: userId })
     .select("_id")
     .lean();
   if (!staff) return null;
   const teachingAssignment = await TeachingAssignment.findOne({
     classSection: classSectionId,
+    subject: subjectId,
     teacher: staff._id,
   }).lean();
   return teachingAssignment ? { staff, teachingAssignment } : null;
@@ -39,15 +49,10 @@ export async function GET(request: Request) {
     );
 
   await connectDB();
-  const context = await getStaffContext(session.userId, classSectionId);
+  const context = await getStaffContext(session.userId, classSectionId, subjectId);
   if (!context)
     return NextResponse.json(
-      { error: "Class assignment not found." },
-      { status: 404 },
-    );
-  if (context.teachingAssignment.subject.toString() !== subjectId)
-    return NextResponse.json(
-      { error: "Subject assignment not found." },
+      { error: "Subject assignment not found for this class." },
       { status: 403 },
     );
 
@@ -123,15 +128,14 @@ export async function POST(request: Request) {
     );
 
   await connectDB();
-  const context = await getStaffContext(session.userId, body.classSectionId);
+  const context = await getStaffContext(
+    session.userId,
+    body.classSectionId,
+    body.subjectId,
+  );
   if (!context)
     return NextResponse.json(
-      { error: "Class assignment not found." },
-      { status: 404 },
-    );
-  if (context.teachingAssignment.subject.toString() !== body.subjectId)
-    return NextResponse.json(
-      { error: "Subject assignment not found." },
+      { error: "Subject assignment not found for this class." },
       { status: 403 },
     );
 

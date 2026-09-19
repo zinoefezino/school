@@ -26,7 +26,9 @@ export async function GET() {
     );
 
   await connectDB();
-  const user = await User.findById(session.userId).select("email role").lean();
+  const user = await User.findById(session.userId)
+    .select("email role lastLoginAt")
+    .lean();
   if (!user)
     return NextResponse.json(
       { error: "User account not found." },
@@ -59,6 +61,7 @@ export async function GET() {
       email: user.email,
       displayName,
       initials: initials(displayName),
+      lastLoginAt: user.lastLoginAt,
     },
   });
 }

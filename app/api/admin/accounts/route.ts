@@ -89,7 +89,7 @@ export async function POST(request: Request) {
             admissionNumber: body.admissionNumber,
             dateOfBirth: body.dateOfBirth,
             gender: body.gender,
-            guardian: body.guardianId,
+            guardian: body.guardianId || undefined,
           })
         )._id.toString();
       }

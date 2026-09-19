@@ -15,6 +15,11 @@ const titles: Record<string, string> = {
   "/dashboard/parent/settings": "Settings",
 };
 
+function formatLastLogin(value?: string) {
+  if (!value) return "Last login not recorded";
+  return `Last login: ${new Date(value).toLocaleString()}`;
+}
+
 export default function ParentTopbar({
   onMenuClick,
 }: {
@@ -24,6 +29,7 @@ export default function ParentTopbar({
   const [user, setUser] = useState<{
     displayName: string;
     initials: string;
+    lastLoginAt?: string;
   } | null>(null);
 
   useEffect(() => {
@@ -51,8 +57,13 @@ export default function ParentTopbar({
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-blue-light text-sm font-medium text-navy">
           {user?.initials ?? "P"}
         </span>
-        <span className="hidden text-sm font-medium text-foreground sm:block">
-          {user?.displayName ?? "Parent"}
+        <span className="hidden sm:block">
+          <span className="block text-sm font-medium text-foreground">
+            {user?.displayName ?? "Parent"}
+          </span>
+          <span className="block text-xs italic text-foreground/45">
+            {formatLastLogin(user?.lastLoginAt)}
+          </span>
         </span>
       </div>
     </header>

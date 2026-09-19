@@ -16,7 +16,6 @@ type Assignment = {
 
 export default function StaffAssignmentsPage() {
   const [classes, setClasses] = useState<StaffClass[]>([]);
-  const [subjects, setSubjects] = useState<Subject[]>([]);
   const [terms, setTerms] = useState<Term[]>([]);
   const [assignments, setAssignments] = useState<Assignment[]>([]);
   const [selectedClassId, setSelectedClassId] = useState("");
@@ -36,7 +35,6 @@ export default function StaffAssignmentsPage() {
     ]);
     const nextClasses = classData.classes ?? [];
     setClasses(nextClasses);
-    setSubjects(classData.subjects ?? []);
     setTerms(lookupData.terms ?? []);
     setAssignments(assignmentData.assignments ?? []);
     setSelectedClassId((current) =>
@@ -84,10 +82,7 @@ export default function StaffAssignmentsPage() {
 
   if (loading) return <LoadingState label="Loading assignments..." />;
   const selectedClass = classes.find((item) => item.id === selectedClassId);
-  const availableSubjects =
-    selectedClass?.subjects && selectedClass.subjects.length > 0
-      ? selectedClass.subjects
-      : subjects;
+  const availableSubjects = selectedClass?.subjects ?? [];
 
   return (
     <div className="grid gap-6 lg:grid-cols-[minmax(0,420px)_1fr]">

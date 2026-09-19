@@ -17,6 +17,7 @@ type StudentOverview = {
   admissionNumber: string;
   dateOfBirth: string;
   gender?: "male" | "female";
+  photoUrl?: string;
   term?: { name?: string; session?: { name?: string } };
   enrollment?: {
     classSection?: { name?: string; classLevel?: { name?: string } };
@@ -29,7 +30,7 @@ type StudentOverview = {
     fullName?: string;
     phone?: string;
     user?: { email?: string };
-  };
+  } | null;
 };
 
 function getAge(dateOfBirth: string) {
@@ -86,6 +87,11 @@ export default function ProfilePage() {
           : "Currently enrolled";
   const details = [
     { label: "Student", value: data.fullName, icon: UserIcon },
+    {
+      label: "Parent",
+      value: data.guardian?.fullName ?? "Not assigned",
+      icon: UserIcon,
+    },
     { label: "Class", value: className, icon: Book02Icon },
     { label: "Academic status", value: academicStatus, icon: CalendarCheckIcon },
     { label: "Term", value: data.term?.name ?? "Not published", icon: Calendar03Icon },
@@ -104,7 +110,12 @@ export default function ProfilePage() {
   return (
     <div className="max-w-4xl rounded-2xl border border-navy/10 bg-white p-6 sm:p-8">
       <div className="flex items-center gap-5 border-b border-black/5 pb-6">
-        <StudentAvatar gender={data.gender} name={data.fullName} size="lg" />
+        <StudentAvatar
+          gender={data.gender}
+          name={data.fullName}
+          photoUrl={data.photoUrl}
+          size="lg"
+        />
         <div>
           <p className="text-sm text-foreground/50">Student profile</p>
           <h2 className="mt-1 text-xl font-medium text-foreground">

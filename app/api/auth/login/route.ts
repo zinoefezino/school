@@ -46,6 +46,10 @@ export async function POST(request: Request) {
       email: user.email,
       role: user.role,
     });
+    await User.updateOne(
+      { _id: user._id },
+      { $set: { lastLoginAt: new Date() } },
+    );
     const response = NextResponse.json({
       role: user.role,
       mustChangePassword: user.mustChangePassword,

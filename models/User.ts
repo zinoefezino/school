@@ -8,6 +8,7 @@ export interface IUser extends Document {
   role: UserRole;
   isActive: boolean;
   mustChangePassword: boolean;
+  lastLoginAt?: Date;
 }
 
 const userSchema = new Schema<IUser>({
@@ -26,6 +27,7 @@ const userSchema = new Schema<IUser>({
   },
   isActive: { type: Boolean, default: true },
   mustChangePassword: { type: Boolean, default: true },
+  lastLoginAt: Date,
 });
 
 export default models.User || model<IUser>("User", userSchema);

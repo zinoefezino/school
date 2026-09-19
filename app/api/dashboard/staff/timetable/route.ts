@@ -7,6 +7,9 @@ import TeachingAssignment from "../../../../../models/TeachingAssignment";
 import TimetableEntry, {
   type TimetableDay,
 } from "../../../../../models/TimetableEntry";
+import "../../../../../models/Subject";
+import "../../../../../models/ClassSection";
+import "../../../../../models/ClassLevel";
 
 const days: TimetableDay[] = [
   "Monday",
