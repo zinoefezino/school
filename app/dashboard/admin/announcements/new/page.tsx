@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { ArrowLeft02Icon, Megaphone01Icon } from "@hugeicons/core-free-icons";
 import type { AnnouncementAudience } from "../../../../../lib/announcements";
+import StatusMessage from "../../../components/StatusMessage";
 
 const audienceOptions: { value: AnnouncementAudience; label: string }[] = [
   { value: "STUDENT", label: "Students" },
@@ -127,7 +128,7 @@ export default function NewAnnouncementPage() {
               ))}
             </div>
           </fieldset>
-          {status && <p className="text-sm text-foreground/70">{status}</p>}
+          {status && <StatusMessage>{status}</StatusMessage>}
           <div className="flex justify-end border-t border-black/5 pt-5">
             <button
               type="submit"

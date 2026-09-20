@@ -3,6 +3,7 @@ import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
 import Student from "../../../../models/Student";
 import Enrollment from "../../../../models/Enrollment";
+import "../../../../models/User";
 import "../../../../models/Guardian";
 import "../../../../models/ClassSection";
 import "../../../../models/ClassLevel";
@@ -30,8 +31,9 @@ export async function GET(request: Request) {
       : {};
     const [students, total] = await Promise.all([
       Student.find(query)
-        .select("fullName admissionNumber guardian")
+        .select("fullName admissionNumber guardian user")
         .populate("guardian", "fullName")
+        .populate("user", "isActive")
         .sort({ fullName: 1 })
         .skip((page - 1) * limit)
         .limit(limit)
@@ -64,7 +66,14 @@ export async function GET(request: Request) {
         guardianName:
           (student.guardian as { fullName?: string } | null)?.fullName ??
           "Not linked",
-        status: "Active",
+        isActive:
+          (student.user as { isActive?: boolean } | undefined)?.isActive ??
+          true,
+        status:
+          (student.user as { isActive?: boolean } | undefined)?.isActive ===
+          false
+            ? "Inactive"
+            : "Active",
       };
     });
     return NextResponse.json({

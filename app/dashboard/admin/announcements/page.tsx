@@ -12,6 +12,7 @@ import {
   type AnnouncementAudience,
 } from "../../../../lib/announcements";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type Announcement = {
   _id: string;
@@ -120,9 +121,7 @@ export default function AdminAnnouncementsPage() {
         ))}
       </div>
       {status && (
-        <p className="rounded-2xl border border-blue/20 bg-blue/5 px-4 py-3 text-sm text-foreground/70">
-          {status}
-        </p>
+        <StatusMessage>{status}</StatusMessage>
       )}
       <div className="flex flex-col gap-4">
         {loading ? (

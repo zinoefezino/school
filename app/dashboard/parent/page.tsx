@@ -188,8 +188,26 @@ export default function ParentDashboard() {
             <p className="mt-1 text-sm text-foreground/60">Results average</p>
           </div>
           <div className="rounded-xl bg-blue-light/50 p-4">
-            <HugeiconsIcon icon={Coins01Icon} size={20} className="text-blue" />
-            <p className="mt-3 text-2xl font-medium text-foreground">
+            <HugeiconsIcon
+              icon={Coins01Icon}
+              size={20}
+              className={
+                child.balance !== null && child.balance > 0
+                  ? "text-[#B4483B]"
+                  : child.billPaid
+                    ? "text-[#3F7A5B]"
+                    : "text-blue"
+              }
+            />
+            <p
+              className={`mt-3 text-2xl font-medium ${
+                child.balance !== null && child.balance > 0
+                  ? "text-[#B4483B]"
+                  : child.billPaid
+                    ? "text-[#3F7A5B]"
+                    : "text-foreground"
+              }`}
+            >
               {child.balance === null ? "No bill" : formatNaira(child.balance)}
             </p>
             <p className="mt-1 text-sm text-foreground/60">Fees balance</p>
@@ -213,7 +231,15 @@ export default function ParentDashboard() {
           <div className="mt-5 flex flex-wrap items-center justify-between gap-4 rounded-xl border border-black/5 p-4">
             <div>
               <p className="text-sm text-foreground/60">Outstanding balance</p>
-              <p className="mt-1 text-2xl font-medium text-foreground">
+              <p
+                className={`mt-1 text-2xl font-medium ${
+                  child.balance !== null && child.balance > 0
+                    ? "text-[#B4483B]"
+                    : child.billPaid
+                      ? "text-[#3F7A5B]"
+                      : "text-foreground"
+                }`}
+              >
                 {child.balance === null ? "No bill" : formatNaira(child.balance)}
               </p>
               <p className="mt-1 text-xs text-foreground/50">

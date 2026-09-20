@@ -3,11 +3,15 @@ import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
 import Invoice from "../../../../models/Invoice";
 import Payment from "../../../../models/Payment";
-import "../../../../models/Student";
-import "../../../../models/ClassSection";
+import Student from "../../../../models/Student";
+import ClassSection from "../../../../models/ClassSection";
 import "../../../../models/ClassLevel";
 import "../../../../models/Term";
 import "../../../../models/AcademicSession";
+
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
 
 export async function GET(request: Request) {
   const session = await getSession();
@@ -19,9 +23,25 @@ export async function GET(request: Request) {
   const params = new URL(request.url).searchParams;
   const page = Math.max(Number(params.get("page") ?? 1), 1);
   const limit = Math.min(Math.max(Number(params.get("limit") ?? 25), 1), 100);
+  const search = params.get("search")?.trim();
+  const status = params.get("status");
   await connectDB();
+  const query: Record<string, unknown> = {};
+  if (status === "PENDING" || status === "PAID" || status === "OVERDUE")
+    query.status = status;
+  if (search) {
+    const regex = new RegExp(escapeRegex(search), "i");
+    const [students, classSections] = await Promise.all([
+      Student.find({ fullName: regex }).select("_id").lean(),
+      ClassSection.find({ name: regex }).select("_id").lean(),
+    ]);
+    query.$or = [
+      { student: { $in: students.map((student) => student._id) } },
+      { classSection: { $in: classSections.map((item) => item._id) } },
+    ];
+  }
   const [invoices, total, allInvoices, payments] = await Promise.all([
-    Invoice.find()
+    Invoice.find(query)
       .populate("student", "fullName")
       .populate({
         path: "classSection",
@@ -37,8 +57,8 @@ export async function GET(request: Request) {
       .skip((page - 1) * limit)
       .limit(limit)
       .lean(),
-    Invoice.countDocuments(),
-    Invoice.find().select("_id amount dueDate status").lean(),
+    Invoice.countDocuments(query),
+    Invoice.find(query).select("_id amount dueDate status").lean(),
     Payment.find().select("invoice amount").lean(),
   ]);
   const paidByInvoice = new Map<string, number>();

@@ -5,6 +5,8 @@ import Student from "../../../../models/Student";
 import ClassSection from "../../../../models/ClassSection";
 import Term from "../../../../models/Term";
 import Staff from "../../../../models/Staff";
+import "../../../../models/ClassLevel";
+import "../../../../models/AcademicSession";
 
 export async function GET() {
   const session = await getSession();

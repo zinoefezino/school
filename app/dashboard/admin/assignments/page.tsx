@@ -1,7 +1,8 @@
 "use client";
 
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, useEffect, useMemo, useState } from "react";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type ClassSection = {
   _id: string;
@@ -24,6 +25,9 @@ function classNameFor(item?: ClassSection | Assignment["classSection"]) {
   return [item?.classLevel?.name, item?.name].filter(Boolean).join(" ");
 }
 
+const pageSize = 8;
+const optionLimit = 15;
+
 export default function AdminAssignmentsPage() {
   const [classes, setClasses] = useState<ClassSection[]>([]);
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -33,6 +37,9 @@ export default function AdminAssignmentsPage() {
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [status, setStatus] = useState("");
+  const [classSearch, setClassSearch] = useState("");
+  const [listSearch, setListSearch] = useState("");
+  const [page, setPage] = useState(1);
 
   const load = async () => {
     const [lookupData, subjectData, assignmentData] = await Promise.all([
@@ -59,6 +66,38 @@ export default function AdminAssignmentsPage() {
       .catch(() => undefined)
       .finally(() => setLoading(false));
   }, []);
+
+  const visibleClasses = useMemo(() => {
+    const search = classSearch.trim().toLowerCase();
+    const matches = search
+      ? classes.filter((item) =>
+          classNameFor(item).toLowerCase().includes(search),
+        )
+      : classes;
+    return matches.slice(0, optionLimit);
+  }, [classSearch, classes]);
+
+  const filteredAssignments = useMemo(() => {
+    const search = listSearch.trim().toLowerCase();
+    if (!search) return assignments;
+    return assignments.filter((assignment) =>
+      [
+        assignment.title,
+        assignment.subject?.name,
+        classNameFor(assignment.classSection),
+        assignment.teacher?.fullName,
+      ]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(search),
+    );
+  }, [assignments, listSearch]);
+  const pages = Math.max(1, Math.ceil(filteredAssignments.length / pageSize));
+  const visibleAssignments = filteredAssignments.slice(
+    (page - 1) * pageSize,
+    page * pageSize,
+  );
 
   const submit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -114,13 +153,19 @@ export default function AdminAssignmentsPage() {
             placeholder="Instructions"
             className="rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
           />
+          <input
+            value={classSearch}
+            onChange={(event) => setClassSearch(event.target.value)}
+            placeholder="Find class"
+            className="rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
+          />
           <select
             required
             name="classSectionId"
             className="rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-blue"
           >
             <option value="">Class</option>
-            {classes.map((item) => (
+            {visibleClasses.map((item) => (
               <option key={item._id} value={item._id}>
                 {classNameFor(item) || "Class"}
               </option>
@@ -169,7 +214,7 @@ export default function AdminAssignmentsPage() {
             className="rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
           />
         </div>
-        {status && <p className="mt-4 text-sm text-foreground/70">{status}</p>}
+        {status && <StatusMessage className="mt-4">{status}</StatusMessage>}
         <button
           disabled={submitting}
           className="mt-5 rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40"
@@ -179,16 +224,32 @@ export default function AdminAssignmentsPage() {
       </form>
 
       <section className="rounded-2xl border border-navy/10 bg-white p-6">
-        <h2 className="text-lg font-medium text-foreground">
-          Published assignments
-        </h2>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-medium text-foreground">
+              Published assignments
+            </h2>
+            <p className="mt-1 text-sm text-foreground/60">
+              {filteredAssignments.length.toLocaleString()} assignments shown
+            </p>
+          </div>
+        </div>
+        <input
+          value={listSearch}
+          onChange={(event) => {
+            setListSearch(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search title, class, subject, or teacher"
+          className="mt-5 w-full rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
+        />
         <div className="mt-4 divide-y divide-black/5">
-          {assignments.length === 0 ? (
+          {filteredAssignments.length === 0 ? (
             <p className="py-8 text-sm text-foreground/60">
-              No assignments published yet.
+              No assignments match your search.
             </p>
           ) : (
-            assignments.map((assignment) => (
+            visibleAssignments.map((assignment) => (
               <div key={assignment._id} className="py-4">
                 <p className="font-medium text-foreground">
                   {assignment.title}
@@ -207,6 +268,33 @@ export default function AdminAssignmentsPage() {
             ))
           )}
         </div>
+        {filteredAssignments.length > pageSize && (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-5">
+            <p className="text-sm text-foreground/60">
+              Page {page} of {pages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={page === pages}
+                onClick={() =>
+                  setPage((current) => Math.min(pages, current + 1))
+                }
+                className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

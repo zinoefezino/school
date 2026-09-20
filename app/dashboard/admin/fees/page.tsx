@@ -1,10 +1,11 @@
 "use client";
 
-import { Fragment, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 import type { FormEvent } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { Coins01Icon, Download01Icon } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type Invoice = {
   _id: string;
@@ -28,20 +29,28 @@ export default function FeesPage() {
   const [loading, setLoading] = useState(true);
   const [manualInvoiceId, setManualInvoiceId] = useState("");
   const [message, setMessage] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [search, setSearch] = useState("");
+  const [status, setStatus] = useState("");
 
-  const load = async () => {
-    const response = await fetch("/api/admin/fees");
+  const load = useCallback(async () => {
+    const params = new URLSearchParams({ page: String(page), limit: "25" });
+    if (search.trim()) params.set("search", search.trim());
+    if (status) params.set("status", status);
+    const response = await fetch(`/api/admin/fees?${params.toString()}`);
     const data = await response.json();
     setInvoices(data.invoices ?? []);
     setSummary(data.summary ?? { collected: 0, pending: 0, overdue: 0 });
     setTotal(data.total ?? 0);
-  };
+    setPages(data.pages ?? 1);
+  }, [page, search, status]);
 
   useEffect(() => {
     Promise.resolve()
       .then(load)
       .finally(() => setLoading(false));
-  }, []);
+  }, [load]);
 
   async function recordManualPayment(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -69,8 +78,13 @@ export default function FeesPage() {
 
   const statusStyles: Record<string, string> = {
     PAID: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
-    PENDING: "bg-blue-light text-blue",
+    PENDING: "bg-[#B88A2C]/10 text-[#8A651E]",
     OVERDUE: "bg-[#B4483B]/10 text-[#B4483B]",
+  };
+  const summaryStyles: Record<string, string> = {
+    Collected: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
+    Outstanding: "bg-[#B4483B]/10 text-[#B4483B]",
+    Overdue: "bg-[#B4483B]/10 text-[#B4483B]",
   };
   return (
     <div className="flex flex-col gap-6">
@@ -84,7 +98,9 @@ export default function FeesPage() {
             key={label}
             className="rounded-2xl border border-navy/10 bg-white p-5"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light text-blue">
+            <span
+              className={`flex h-10 w-10 items-center justify-center rounded-full ${summaryStyles[String(label)] ?? "bg-blue-light text-blue"}`}
+            >
               <HugeiconsIcon icon={Coins01Icon} size={20} />
             </span>
             <p className="mt-4 text-2xl font-medium text-foreground">
@@ -112,10 +128,32 @@ export default function FeesPage() {
         </div>
       </div>
       {message && (
-        <p className="rounded-2xl bg-white px-5 py-3 text-sm text-foreground/70">
-          {message}
-        </p>
+        <StatusMessage>{message}</StatusMessage>
       )}
+      <div className="grid gap-3 rounded-2xl border border-navy/10 bg-white p-4 md:grid-cols-[1fr_180px]">
+        <input
+          value={search}
+          onChange={(event) => {
+            setSearch(event.target.value);
+            setPage(1);
+          }}
+          placeholder="Search student or class"
+          className="rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
+        />
+        <select
+          value={status}
+          onChange={(event) => {
+            setStatus(event.target.value);
+            setPage(1);
+          }}
+          className="rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-blue"
+        >
+          <option value="">All status</option>
+          <option value="PENDING">Pending</option>
+          <option value="PAID">Paid</option>
+          <option value="OVERDUE">Overdue</option>
+        </select>
+      </div>
       <div className="overflow-x-auto rounded-2xl border border-navy/10 bg-white">
         <table className="w-full text-left">
           <thead>
@@ -172,10 +210,16 @@ export default function FeesPage() {
                     <td className="px-6 py-4 text-foreground/70">
                       ₦{invoice.amount.toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-foreground/70">
+                    <td className="px-6 py-4 font-medium text-[#3F7A5B]">
                       ₦{(invoice.paidAmount ?? 0).toLocaleString()}
                     </td>
-                    <td className="px-6 py-4 text-foreground/70">
+                    <td
+                      className={`px-6 py-4 font-medium ${
+                        (invoice.balance ?? invoice.amount) > 0
+                          ? "text-[#B4483B]"
+                          : "text-[#3F7A5B]"
+                      }`}
+                    >
                       ₦{(invoice.balance ?? invoice.amount).toLocaleString()}
                     </td>
                     <td className="px-6 py-4 text-foreground/70">
@@ -267,6 +311,31 @@ export default function FeesPage() {
           </tbody>
         </table>
       </div>
+      {pages > 1 && (
+        <div className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-navy/10 bg-white px-5 py-3">
+          <p className="text-sm text-foreground/60">
+            Page {page} of {pages}
+          </p>
+          <div className="flex gap-2">
+            <button
+              type="button"
+              disabled={page === 1 || loading}
+              onClick={() => setPage((current) => Math.max(1, current - 1))}
+              className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Previous
+            </button>
+            <button
+              type="button"
+              disabled={page === pages || loading}
+              onClick={() => setPage((current) => Math.min(pages, current + 1))}
+              className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

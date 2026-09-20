@@ -80,21 +80,25 @@ export default function FinanceOverviewPage() {
       label: "Total billed",
       value: formatNaira(totals.totalBilled),
       icon: Invoice01Icon,
+      tone: "bg-blue-light text-blue",
     },
     {
       label: "Total collected",
       value: formatNaira(totals.totalCollected),
       icon: Coins01Icon,
+      tone: "bg-[#3F7A5B]/10 text-[#3F7A5B]",
     },
     {
       label: "Outstanding",
       value: formatNaira(totals.outstanding),
       icon: MoneyReceive01Icon,
+      tone: "bg-[#B4483B]/10 text-[#B4483B]",
     },
     {
       label: "Collection rate",
       value: `${totals.collectionRate}%`,
       icon: ChartBarLineIcon,
+      tone: "bg-blue-light text-blue",
     },
   ];
 
@@ -106,7 +110,9 @@ export default function FinanceOverviewPage() {
             key={card.label}
             className="rounded-2xl border border-navy/10 bg-white p-5"
           >
-            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-blue-light text-blue">
+            <span
+              className={`flex h-10 w-10 items-center justify-center rounded-full ${card.tone}`}
+            >
               <HugeiconsIcon icon={card.icon} size={20} />
             </span>
             <p className="mt-4 text-2xl font-medium text-foreground">
@@ -165,10 +171,10 @@ export default function FinanceOverviewPage() {
                       <td className="px-3 py-4 text-foreground/70">
                         {formatNaira(session.totalBilled)}
                       </td>
-                      <td className="px-3 py-4 text-foreground/70">
+                      <td className="px-3 py-4 font-medium text-[#3F7A5B]">
                         {formatNaira(session.totalCollected)}
                       </td>
-                      <td className="px-3 py-4 text-foreground/70">
+                      <td className="px-3 py-4 font-medium text-[#B4483B]">
                         {formatNaira(session.outstanding)}
                       </td>
                       <td className="px-3 py-4">

@@ -4,6 +4,10 @@ import { getSession } from "../../../../lib/session";
 import Enrollment from "../../../../models/Enrollment";
 import Invoice from "../../../../models/Invoice";
 import ClassFee from "../../../../models/ClassFee";
+import "../../../../models/ClassSection";
+import "../../../../models/ClassLevel";
+import "../../../../models/Term";
+import "../../../../models/AcademicSession";
 
 export async function POST(request: Request) {
   const session = await getSession();

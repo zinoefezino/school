@@ -17,6 +17,7 @@ type Student = {
   classSection: string;
   guardianName: string;
   status: string;
+  isActive?: boolean;
 };
 export default function StudentsPage() {
   const [students, setStudents] = useState<Student[]>([]);
@@ -176,7 +177,13 @@ export default function StudentsPage() {
                     {student.guardianName}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-[#3F7A5B]/10 px-2.5 py-1 text-xs font-medium text-[#3F7A5B]">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        student.isActive === false
+                          ? "bg-[#B4483B]/10 text-[#B4483B]"
+                          : "bg-[#3F7A5B]/10 text-[#3F7A5B]"
+                      }`}
+                    >
                       {student.status}
                     </span>
                   </td>
@@ -185,6 +192,20 @@ export default function StudentsPage() {
                       label={student.fullName}
                       editHref={`/dashboard/admin/students/${student._id}/edit`}
                       deactivateHref={`/api/admin/students/${student._id}`}
+                      isActive={student.isActive !== false}
+                      onStatusChange={(nextStatus) =>
+                        setStudents((current) =>
+                          current.map((item) =>
+                            item._id === student._id
+                              ? {
+                                  ...item,
+                                  isActive: nextStatus,
+                                  status: nextStatus ? "Active" : "Inactive",
+                                }
+                              : item,
+                          ),
+                        )
+                      }
                     />
                   </td>
                 </tr>

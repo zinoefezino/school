@@ -12,7 +12,7 @@ type Staff = {
   department?: string;
   phone?: string;
   subjects: { name: string }[];
-  user?: { email?: string };
+  user?: { email?: string; isActive?: boolean };
 };
 export default function StaffPage() {
   const [staff, setStaff] = useState<Staff[]>([]);
@@ -116,6 +116,7 @@ export default function StaffPage() {
               <th className="px-6 py-3.5">Department</th>
               <th className="px-6 py-3.5">Subjects</th>
               <th className="px-6 py-3.5">Email</th>
+              <th className="px-6 py-3.5">Status</th>
               <th className="px-6 py-3.5" />
             </tr>
           </thead>
@@ -123,7 +124,7 @@ export default function StaffPage() {
             {loading ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
                   <LoadingState label="Loading staff..." className="min-h-24" />
@@ -132,7 +133,7 @@ export default function StaffPage() {
             ) : staff.length === 0 ? (
               <tr>
                 <td
-                  colSpan={5}
+                  colSpan={6}
                   className="p-8 text-center text-sm text-foreground/60"
                 >
                   {error || "No staff found."}
@@ -155,11 +156,38 @@ export default function StaffPage() {
                   <td className="px-6 py-4 text-foreground/70">
                     {member.user?.email ?? "-"}
                   </td>
+                  <td className="px-6 py-4">
+                    <span
+                      className={`rounded-full px-2.5 py-1 text-xs font-medium ${
+                        member.user?.isActive === false
+                          ? "bg-[#B4483B]/10 text-[#B4483B]"
+                          : "bg-[#3F7A5B]/10 text-[#3F7A5B]"
+                      }`}
+                    >
+                      {member.user?.isActive === false ? "Inactive" : "Active"}
+                    </span>
+                  </td>
                   <td className="px-6 py-4 text-right">
                     <ActionMenu
                       label={member.fullName}
                       editHref={`/dashboard/admin/staff/${member._id}/edit`}
                       deactivateHref={`/api/admin/staff/${member._id}`}
+                      isActive={member.user?.isActive !== false}
+                      onStatusChange={(nextStatus) =>
+                        setStaff((current) =>
+                          current.map((item) =>
+                            item._id === member._id
+                              ? {
+                                  ...item,
+                                  user: {
+                                    ...item.user,
+                                    isActive: nextStatus,
+                                  },
+                                }
+                              : item,
+                          ),
+                        )
+                      }
                     />
                   </td>
                 </tr>

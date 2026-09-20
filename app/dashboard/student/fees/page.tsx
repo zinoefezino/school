@@ -70,7 +70,15 @@ export default function FeesPage() {
           </div>
           <HugeiconsIcon icon={Coins01Icon} size={25} className="text-blue" />
         </div>
-        <p className="mt-6 text-3xl font-medium text-foreground">
+        <p
+          className={`mt-6 text-3xl font-medium ${
+            currentBill && currentBill.balance > 0
+              ? "text-[#B4483B]"
+              : currentBill && currentBill.balance === 0
+                ? "text-[#3F7A5B]"
+                : "text-foreground"
+          }`}
+        >
           {currentBill ? formatNaira(currentBill.balance) : "No bill"}
         </p>
         <p className={`mt-1 text-sm ${currentBillStatusClass}`}>
@@ -88,7 +96,11 @@ export default function FeesPage() {
             />
             Total outstanding balance
           </span>
-          <span className="text-lg font-semibold text-foreground">
+          <span
+            className={`text-lg font-semibold ${
+              outstanding > 0 ? "text-[#B4483B]" : "text-[#3F7A5B]"
+            }`}
+          >
             {formatNaira(outstanding)}
           </span>
         </div>
@@ -125,7 +137,7 @@ export default function FeesPage() {
                 <span className="text-sm text-foreground/70">
                   Billed: {formatNaira(bill.amount)}
                 </span>
-                <span className="text-sm text-foreground/70">
+                <span className="text-sm font-medium text-[#3F7A5B]">
                   Paid: {formatNaira(bill.paidAmount)}
                 </span>
                 <span

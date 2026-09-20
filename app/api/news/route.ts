@@ -27,11 +27,18 @@ function normalizeStatus(value: unknown): NewsStatus {
   return value === "PUBLISHED" ? "PUBLISHED" : "DRAFT";
 }
 
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
 export async function GET(request: Request) {
   const session = await getSession();
   const params = new URL(request.url).searchParams;
   const includeDrafts = params.get("includeDrafts") === "true";
+  const page = Math.max(Number(params.get("page") ?? 1) || 1, 1);
   const limit = Math.min(Number(params.get("limit") ?? 20) || 20, 50);
+  const search = params.get("search")?.trim();
+  const status = params.get("status");
 
   if (includeDrafts && session?.role !== "ADMIN")
     return NextResponse.json(
@@ -40,13 +47,25 @@ export async function GET(request: Request) {
     );
 
   await connectDB();
-  const query = includeDrafts ? {} : { status: "PUBLISHED" };
-  const posts = await NewsPost.find(query)
-    .sort({ publishedAt: -1, createdAt: -1 })
-    .limit(limit)
-    .lean();
+  const query: Record<string, unknown> = includeDrafts
+    ? {}
+    : { status: "PUBLISHED" };
+  if (includeDrafts && (status === "PUBLISHED" || status === "DRAFT"))
+    query.status = status;
+  if (search) {
+    const regex = new RegExp(escapeRegex(search), "i");
+    query.$or = [{ title: regex }, { excerpt: regex }, { category: regex }];
+  }
+  const [posts, total] = await Promise.all([
+    NewsPost.find(query)
+      .sort({ publishedAt: -1, createdAt: -1 })
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    NewsPost.countDocuments(query),
+  ]);
   return NextResponse.json(
-    { posts },
+    { posts, total, page, limit, pages: Math.max(1, Math.ceil(total / limit)) },
     { headers: { "Cache-Control": "no-store" } },
   );
 }

@@ -43,7 +43,7 @@ export async function GET() {
       attendance,
       totalAttendance,
       invoice,
-      term,
+      resultTerm,
       enrollment,
       previousEnrollment,
     ] =
@@ -65,6 +65,11 @@ export async function GET() {
             select: "name classLevel",
             populate: { path: "classLevel", select: "name" },
           })
+          .populate({
+            path: "term",
+            select: "name session",
+            populate: { path: "session", select: "name" },
+          })
           .lean(),
         Enrollment.findOne({ student: student._id, status: "COMPLETED" })
           .sort({ _id: -1 })
@@ -75,8 +80,12 @@ export async function GET() {
           })
           .lean(),
       ]);
-    const assessments = term
-      ? await Assessment.find({ student: student._id, term: term._id })
+    const displayTerm =
+      (enrollment?.term as
+        | { _id?: unknown; name?: string; session?: { name?: string } }
+        | undefined) ?? resultTerm;
+    const assessments = resultTerm
+      ? await Assessment.find({ student: student._id, term: resultTerm._id })
           .select("score")
           .lean()
       : [];
@@ -105,7 +114,7 @@ export async function GET() {
         : previousEnrollment
           ? "COMPLETED"
           : "UNASSIGNED",
-      term,
+      term: displayTerm,
       attendance: totalAttendance
         ? Math.round((attendance / totalAttendance) * 100)
         : 0,

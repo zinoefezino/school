@@ -8,6 +8,7 @@ import {
   Download01Icon,
 } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type ChildSummary = {
   id: string;
@@ -149,7 +150,18 @@ export default function ParentFeesPage() {
             </label>
             <div className="text-right">
               <p className="text-sm text-foreground/60">Outstanding balance</p>
-              <p className="text-2xl font-medium text-foreground">
+              <p
+                className={`text-2xl font-medium ${
+                  childInvoices.reduce(
+                    (sum, invoice) => sum + (invoice.balance ?? 0),
+                    0,
+                  ) > 0
+                    ? "text-[#B4483B]"
+                    : childInvoices.some((invoice) => invoice.billPaid)
+                      ? "text-[#3F7A5B]"
+                      : "text-foreground"
+                }`}
+              >
                 {formatMaybeNaira(
                   childInvoices.reduce(
                     (sum, invoice) => sum + (invoice.balance ?? 0),
@@ -161,9 +173,7 @@ export default function ParentFeesPage() {
           </div>
 
           {message && (
-            <p className="mt-5 rounded-xl bg-blue-light/50 px-4 py-3 text-sm text-foreground/70">
-              {message}
-            </p>
+            <StatusMessage className="mt-5">{message}</StatusMessage>
           )}
 
           <div className="mt-6 grid gap-4">
@@ -208,8 +218,16 @@ export default function ParentFeesPage() {
                     </div>
                     <div className="mt-5 grid gap-3 text-sm text-foreground/70 sm:grid-cols-4">
                       <p>Total: {formatNaira(invoice.amount)}</p>
-                      <p>Paid: {formatNaira(invoice.paidAmount ?? 0)}</p>
-                      <p>Balance: {formatNaira(balance)}</p>
+                      <p className="font-medium text-[#3F7A5B]">
+                        Paid: {formatNaira(invoice.paidAmount ?? 0)}
+                      </p>
+                      <p
+                        className={`font-medium ${
+                          balance > 0 ? "text-[#B4483B]" : "text-[#3F7A5B]"
+                        }`}
+                      >
+                        Balance: {formatNaira(balance)}
+                      </p>
                       <p>
                         Due:{" "}
                         {invoice.dueDate
@@ -295,7 +313,7 @@ export default function ParentFeesPage() {
                     <td className="px-6 py-4 text-foreground/70">
                       {payment.paystackReference}
                     </td>
-                    <td className="px-6 py-4 text-foreground/70">
+                    <td className="px-6 py-4 font-medium text-[#3F7A5B]">
                       {formatNaira(payment.amount)}
                     </td>
                     <td className="px-6 py-4">

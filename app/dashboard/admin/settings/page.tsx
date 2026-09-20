@@ -9,6 +9,7 @@ import {
 } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
 import AccountSummary from "../../components/AccountSummary";
+import StatusMessage from "../../components/StatusMessage";
 
 type Settings = {
   schoolName: string;
@@ -124,7 +125,7 @@ export default function SettingsPage() {
           </label>
         </div>
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-black/5 pt-5">
-          <span className="text-sm text-foreground/60">{status}</span>
+          {status && <StatusMessage>{status}</StatusMessage>}
           <button className="rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
             Save settings
           </button>
@@ -200,7 +201,7 @@ export default function SettingsPage() {
           </label>
         </div>
         <div className="mt-5 flex items-center justify-between gap-4 border-t border-black/5 pt-5">
-          <span className="text-sm text-foreground/60">{passwordStatus}</span>
+          {passwordStatus && <StatusMessage>{passwordStatus}</StatusMessage>}
           <button className="rounded-full border border-navy/15 px-5 py-2.5 text-sm font-medium text-navy hover:bg-blue-light">
             Change password
           </button>

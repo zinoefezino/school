@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import StatusMessage from "../../../components/StatusMessage";
 
 type Lookup = {
   _id: string;
@@ -16,15 +17,28 @@ export default function PromoteStudentPage() {
   const [classes, setClasses] = useState<Lookup[]>([]);
   const [terms, setTerms] = useState<Lookup[]>([]);
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
     fetch("/api/admin/lookups")
-      .then((response) => response.json())
+      .then(async (response) => {
+        const data = await response.json();
+        if (!response.ok)
+          throw new Error(data.error ?? "Unable to load promotion options.");
+        return data;
+      })
       .then((data) => {
         setStudents(data.students ?? []);
         setClasses(data.classes ?? []);
         setTerms(data.terms ?? []);
       })
-      .catch(() => setMessage("Unable to load promotion options."));
+      .catch((error) =>
+        setMessage(
+          error instanceof Error
+            ? error.message
+            : "Unable to load promotion options.",
+        ),
+      )
+      .finally(() => setLoading(false));
   }, []);
   async function submit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -61,6 +75,7 @@ export default function PromoteStudentPage() {
             <select
               required
               name="studentId"
+              disabled={loading}
               className="rounded-xl border border-black/10 bg-white px-4 py-3 font-normal"
             >
               {students.map((student) => (
@@ -75,6 +90,7 @@ export default function PromoteStudentPage() {
             <select
               required
               name="classSectionId"
+              disabled={loading}
               className="rounded-xl border border-black/10 bg-white px-4 py-3 font-normal"
             >
               {classes.map((item) => (
@@ -89,6 +105,7 @@ export default function PromoteStudentPage() {
             <select
               required
               name="termId"
+              disabled={loading}
               className="rounded-xl border border-black/10 bg-white px-4 py-3 font-normal"
             >
               {terms.map((term) => (
@@ -100,11 +117,14 @@ export default function PromoteStudentPage() {
           </label>
         </div>
         {message && (
-          <p className="mt-5 text-sm text-foreground/70">{message}</p>
+          <StatusMessage className="mt-5">{message}</StatusMessage>
         )}
         <div className="mt-6 flex justify-end border-t border-black/5 pt-5">
-          <button className="rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700">
-            Promote student
+          <button
+            disabled={loading}
+            className="rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white hover:bg-blue-700 disabled:opacity-50"
+          >
+            {loading ? "Loading options..." : "Promote student"}
           </button>
         </div>
       </form>

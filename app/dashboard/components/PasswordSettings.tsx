@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { HugeiconsIcon } from "@hugeicons/react";
 import { LockPasswordIcon } from "@hugeicons/core-free-icons";
 import AccountSummary from "./AccountSummary";
+import StatusMessage from "./StatusMessage";
 
 export default function PasswordSettings() {
   const [currentPassword, setCurrentPassword] = useState("");
@@ -94,7 +95,7 @@ export default function PasswordSettings() {
             />
           </label>
 
-          {status && <p className="text-sm text-foreground/70">{status}</p>}
+          {status && <StatusMessage>{status}</StatusMessage>}
 
           <div className="flex justify-end border-t border-black/5 pt-5">
             <button

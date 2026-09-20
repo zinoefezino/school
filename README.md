@@ -85,6 +85,14 @@ API routes also check the signed session and enforce role specific access on the
 
 Parent access is resolved from the signed session cookie and `Guardian.user`. The app does not trust client supplied guardian or student ids for ownership. Parent child, attendance, fees, and result APIs verify that requested students belong to the logged in parent.
 
+The admin topbar includes a protected global search. It calls:
+
+```txt
+/api/admin/search?q=...
+```
+
+The route requires an admin session and returns a small capped result set across students, staff, parents/guardians, classes, invoices, announcements, and news posts. The topbar opens a dropdown after at least two characters, and selecting a result navigates to the relevant admin page.
+
 Security notes before production:
 
 - use a long random `AUTH_SECRET`
@@ -192,6 +200,16 @@ ClassSection.classTeacher → Staff
 ```
 
 The class teacher is responsible for class-level duties such as attendance. This is separate from subject teaching.
+
+Admin assigns or changes a class teacher from:
+
+```txt
+Dashboard → Admin → Academics → Classes → Edit
+```
+
+The edit screen uses a staff dropdown, not a raw staff id. Choosing `Unassigned` clears the class teacher.
+
+Classes can be deleted from the class list or from the edit screen, but deletion is blocked when the class has active students. This protects enrollment, attendance, invoice, and result history. The app does not use a "disable class" action because classes do not have login access. If a school later needs to retire old classes while keeping history, the recommended feature is archive/close class rather than disable class.
 
 ### 6. How subject teachers are assigned
 
@@ -440,6 +458,12 @@ The main admin sidebar stays focused on major areas:
 - Communication
 - Settings
 
+Finance pages are built to avoid long uncontrolled scrolling:
+
+- Fee structure has class search, a limited class dropdown, searchable fee schedules, status/term filters, and pagination.
+- Student invoices use server side pagination, student/class search, and status filters.
+- Transactions, outstanding payments, and reports are kept inside the finance module so the admin sidebar remains focused.
+
 Saving a fee schedule keeps it as a draft/setup record. Publishing a fee schedule generates invoices for active students in that class and term:
 
 ```txt
@@ -530,6 +554,8 @@ Later, when file storage is configured, parent-submitted manual payment proof ca
 - Added staff assignment and timetable creation flows.
 - Added admin academic setup pages for sessions, terms, subjects, subject teachers, assignments, and timetable.
 - Added admin student pagination and database indexes for larger school sizes.
+- Added search and pagination for scalable admin lists including classes, fee schedules, invoices, news, assignments, and timetable entries.
+- Added protected admin global search in the topbar for students, staff, parents/guardians, classes, invoices, announcements, and news.
 - Fixed admin student action dropdown clipping by rendering the menu above table overflow.
 - Refactored admin navigation into major sidebar modules with internal tab/grid navigation to reduce sidebar crowding.
 
@@ -538,6 +564,14 @@ Later, when file storage is configured, parent-submitted manual payment proof ca
 The app is being prepared for schools with thousands of students:
 
 - Admin students list uses pagination.
+- Admin staff list uses pagination.
+- Admin classes list uses search, level filtering, and pagination.
+- Admin announcements use server side pagination.
+- Admin news uses server side search, status filtering, and pagination.
+- Admin fee schedules use search, filters, and pagination.
+- Admin invoices use server side pagination, student/class search, and status filtering.
+- Admin assignments and timetable pages use search and pagination, with limited class dropdowns to avoid huge select menus.
+- The admin topbar global search returns a capped result set instead of loading every matching record.
 - Key models now include indexes for frequent dashboard queries.
 - Attendance, assessments, enrollments, invoices, assignments, and timetable lookups are designed around class, term, student, subject, and teacher references.
 

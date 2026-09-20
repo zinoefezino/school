@@ -66,13 +66,13 @@ export default function FinancialReportsPage() {
                   <td className="px-4 py-4 text-foreground/70">
                     {formatNaira(session.totalBilled)}
                   </td>
-                  <td className="px-4 py-4 text-foreground/70">
+                  <td className="px-4 py-4 font-medium text-[#3F7A5B]">
                     {formatNaira(session.totalCollected)}
                   </td>
-                  <td className="px-4 py-4 text-foreground/70">
+                  <td className="px-4 py-4 font-medium text-[#B4483B]">
                     {formatNaira(session.outstanding)}
                   </td>
-                  <td className="px-4 py-4 text-foreground/70">
+                  <td className="px-4 py-4 font-medium text-[#B4483B]">
                     {formatNaira(session.overdue)}
                   </td>
                   <td className="px-4 py-4 text-foreground/70">

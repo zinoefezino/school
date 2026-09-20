@@ -7,10 +7,14 @@ export default function ActionMenu({
   editHref,
   deactivateHref,
   label,
+  isActive = true,
+  onStatusChange,
 }: {
   editHref: string;
   deactivateHref: string;
   label: string;
+  isActive?: boolean;
+  onStatusChange?: (isActive: boolean) => void;
 }) {
   const [open, setOpen] = useState(false);
   const [message, setMessage] = useState("");
@@ -51,17 +55,17 @@ export default function ActionMenu({
     return () => document.removeEventListener("mousedown", close);
   }, [open]);
 
-  async function deactivate() {
+  async function toggleLogin() {
     setMessage("");
     const response = await fetch(deactivateHref, {
       method: "PATCH",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ isActive: false }),
+      body: JSON.stringify({ isActive: !isActive }),
     });
     if (response.ok) {
-      setMessage("Deactivated");
+      setMessage(isActive ? "Login disabled" : "Login enabled");
+      onStatusChange?.(!isActive);
       setOpen(false);
-      window.location.reload();
     } else {
       const data = await response.json();
       setMessage(data.error ?? "Unable to update");
@@ -83,10 +87,10 @@ export default function ActionMenu({
             </a>
             <button
               type="button"
-              onClick={deactivate}
+              onClick={toggleLogin}
               className="block w-full rounded-lg px-3 py-2 text-left text-sm text-[#B4483B] hover:bg-[#B4483B]/5"
             >
-              Deactivate
+              {isActive ? "Disable login" : "Enable login"}
             </button>
             {message && (
               <span className="block px-3 py-2 text-xs text-[#B4483B]">

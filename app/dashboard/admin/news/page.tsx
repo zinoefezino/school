@@ -9,6 +9,7 @@ import {
   Megaphone01Icon,
 } from "@hugeicons/core-free-icons";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type NewsPost = {
   _id: string;
@@ -28,12 +29,26 @@ export default function AdminNewsPage() {
   const [submitting, setSubmitting] = useState(false);
   const [deletingSlug, setDeletingSlug] = useState("");
   const [status, setStatus] = useState("");
+  const [search, setSearch] = useState("");
+  const [postStatus, setPostStatus] = useState("");
+  const [page, setPage] = useState(1);
+  const [pages, setPages] = useState(1);
+  const [total, setTotal] = useState(0);
 
   const load = useCallback(async () => {
-    const response = await fetch("/api/news?includeDrafts=true&limit=50");
+    const params = new URLSearchParams({
+      includeDrafts: "true",
+      limit: "10",
+      page: String(page),
+    });
+    if (search.trim()) params.set("search", search.trim());
+    if (postStatus) params.set("status", postStatus);
+    const response = await fetch(`/api/news?${params.toString()}`);
     const data = response.ok ? await response.json() : { posts: [] };
     setPosts(data.posts ?? []);
-  }, []);
+    setPages(data.pages ?? 1);
+    setTotal(data.total ?? 0);
+  }, [page, postStatus, search]);
 
   useEffect(() => {
     Promise.resolve()
@@ -79,6 +94,7 @@ export default function AdminNewsPage() {
       if (!response.ok)
         throw new Error(result.error ?? "Unable to delete news post.");
       setPosts((current) => current.filter((item) => item.slug !== post.slug));
+      setTotal((current) => Math.max(0, current - 1));
       setStatus("News post deleted.");
     } catch (error) {
       setStatus(
@@ -157,7 +173,7 @@ export default function AdminNewsPage() {
           </select>
         </div>
 
-        {status && <p className="mt-4 text-sm text-foreground/70">{status}</p>}
+        {status && <StatusMessage className="mt-4">{status}</StatusMessage>}
         <button
           disabled={submitting}
           className="mt-5 flex items-center gap-2 rounded-full bg-blue px-5 py-2.5 text-sm font-medium text-white disabled:opacity-40"
@@ -168,7 +184,37 @@ export default function AdminNewsPage() {
       </form>
 
       <section className="rounded-2xl border border-navy/10 bg-white p-6">
-        <h2 className="text-lg font-medium text-foreground">News posts</h2>
+        <div className="flex flex-wrap items-start justify-between gap-4">
+          <div>
+            <h2 className="text-lg font-medium text-foreground">News posts</h2>
+            <p className="mt-1 text-sm text-foreground/60">
+              {total.toLocaleString()} posts found
+            </p>
+          </div>
+        </div>
+        <div className="mt-5 grid gap-3 md:grid-cols-[1fr_180px]">
+          <input
+            value={search}
+            onChange={(event) => {
+              setSearch(event.target.value);
+              setPage(1);
+            }}
+            placeholder="Search title, summary, or category"
+            className="rounded-xl border border-black/10 px-4 py-3 text-sm outline-none focus:border-blue"
+          />
+          <select
+            value={postStatus}
+            onChange={(event) => {
+              setPostStatus(event.target.value);
+              setPage(1);
+            }}
+            className="rounded-xl border border-black/10 bg-white px-4 py-3 text-sm outline-none focus:border-blue"
+          >
+            <option value="">All status</option>
+            <option value="PUBLISHED">Published</option>
+            <option value="DRAFT">Draft</option>
+          </select>
+        </div>
         <div className="mt-4 divide-y divide-black/5">
           {posts.length === 0 ? (
             <p className="py-8 text-sm text-foreground/60">
@@ -232,6 +278,33 @@ export default function AdminNewsPage() {
             ))
           )}
         </div>
+        {pages > 1 && (
+          <div className="mt-5 flex flex-wrap items-center justify-between gap-3 border-t border-black/5 pt-5">
+            <p className="text-sm text-foreground/60">
+              Page {page} of {pages}
+            </p>
+            <div className="flex gap-2">
+              <button
+                type="button"
+                disabled={page === 1}
+                onClick={() => setPage((current) => Math.max(1, current - 1))}
+                className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Previous
+              </button>
+              <button
+                type="button"
+                disabled={page === pages}
+                onClick={() =>
+                  setPage((current) => Math.min(pages, current + 1))
+                }
+                className="rounded-full border border-navy/15 px-4 py-2 text-sm font-medium text-navy disabled:cursor-not-allowed disabled:opacity-40"
+              >
+                Next
+              </button>
+            </div>
+          </div>
+        )}
       </section>
     </div>
   );

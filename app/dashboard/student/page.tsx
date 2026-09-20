@@ -171,8 +171,26 @@ export default function StudentDashboard() {
           </p>
         </div>
         <div className="rounded-2xl border border-navy/10 bg-white p-5">
-          <HugeiconsIcon icon={Coins01Icon} size={20} className="text-blue" />
-          <p className="mt-4 text-2xl font-medium text-foreground">
+          <HugeiconsIcon
+            icon={Coins01Icon}
+            size={20}
+            className={
+              data.feesBalance !== null && data.feesBalance > 0
+                ? "text-[#B4483B]"
+                : data.feesBalance === 0
+                  ? "text-[#3F7A5B]"
+                  : "text-blue"
+            }
+          />
+          <p
+            className={`mt-4 text-2xl font-medium ${
+              data.feesBalance !== null && data.feesBalance > 0
+                ? "text-[#B4483B]"
+                : data.feesBalance === 0
+                  ? "text-[#3F7A5B]"
+                  : "text-foreground"
+            }`}
+          >
             {data.feesBalance === null
               ? "No bill"
               : `₦${data.feesBalance.toLocaleString()}`}

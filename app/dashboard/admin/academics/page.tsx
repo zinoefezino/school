@@ -2,6 +2,7 @@
 
 import { FormEvent, useEffect, useState } from "react";
 import LoadingState from "../../components/LoadingState";
+import StatusMessage from "../../components/StatusMessage";
 
 type AcademicSession = { _id: string; name: string };
 type Term = {
@@ -152,9 +153,7 @@ export default function AdminAcademicsPage() {
       </div>
 
       {status && (
-        <p className="rounded-2xl border border-blue/20 bg-blue/5 px-4 py-3 text-sm text-foreground/70">
-          {status}
-        </p>
+        <StatusMessage>{status}</StatusMessage>
       )}
 
       <div className="grid gap-6 xl:grid-cols-3">
