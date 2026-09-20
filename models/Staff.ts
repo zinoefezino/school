@@ -21,4 +21,8 @@ const staffSchema = new Schema<IStaff>({
   subjects: [{ type: Schema.Types.ObjectId, ref: "Subject" }],
 });
 
+staffSchema.index({ fullName: 1 });
+staffSchema.index({ department: 1 });
+staffSchema.index({ phone: 1 });
+
 export default models.Staff || model<IStaff>("Staff", staffSchema);

@@ -91,16 +91,35 @@ The admin topbar includes a protected global search. It calls:
 /api/admin/search?q=...
 ```
 
-The route requires an admin session and returns a small capped result set across students, staff, parents/guardians, classes, invoices, announcements, and news posts. The topbar opens a dropdown after at least two characters, and selecting a result navigates to the relevant admin page.
+The route requires an admin session and returns a small capped result set across students, staff, parents/guardians, classes, invoices, announcements, and news posts. The query is capped, the response is not cached, and the topbar opens a concise dropdown after at least two characters. Selecting a result navigates to the relevant admin page. The search is available on mobile and desktop admin layouts.
+
+Sensitive endpoints have a lightweight in-memory rate limiter:
+
+- login attempts
+- forgot password requests
+- reset password submissions
+- admin global search
+
+This protects the app from accidental abuse and simple repeated attempts. For multi-instance production deployments, replace or back this with a shared store such as Redis/Upstash so limits are enforced across all serverless instances.
+
+Admin mutations are recorded in `AuditLog` for accountability. Current audited actions include:
+
+- account creation
+- student and staff profile/status updates
+- class teacher/class updates and class deletion
+- fee schedule save/publish
+- manual payment recording
+- announcement deletion
+- news draft/publish/delete
 
 Security notes before production:
 
 - use a long random `AUTH_SECRET`
 - use HTTPS so secure cookies are enforced
 - keep MongoDB credentials private
-- add rate limiting for login, forgot password, and reset password endpoints
+- move rate limiting to a shared production store if the app runs on multiple instances
 - add email delivery for password resets instead of showing reset links directly in development workflows
-- review audit logging for admin actions such as account creation, deactivation, announcement deletion, and payment updates
+- review audit logs regularly and add an admin audit-log viewer if the school wants in-dashboard compliance reporting
 
 ## Academic model
 
@@ -148,6 +167,14 @@ Student.guardian = logged-in Guardian._id
 ```
 
 The student profile also shows the assigned parent if one exists.
+
+Admin manages parent accounts from:
+
+```txt
+Dashboard → Admin → Parents
+```
+
+The parent list is searchable and paginated, shows linked-child counts, and supports large parent populations without rendering every parent at once. Student creation also uses a searchable guardian selector so schools with many parents do not have to scroll through a huge dropdown.
 
 ### 3. Classes and class levels
 
@@ -554,6 +581,8 @@ Later, when file storage is configured, parent-submitted manual payment proof ca
 - Added staff assignment and timetable creation flows.
 - Added admin academic setup pages for sessions, terms, subjects, subject teachers, assignments, and timetable.
 - Added admin student pagination and database indexes for larger school sizes.
+- Added admin parent list with search, pagination, linked-child counts, and active/inactive status.
+- Added searchable guardian selector when creating students.
 - Added search and pagination for scalable admin lists including classes, fee schedules, invoices, news, assignments, and timetable entries.
 - Added protected admin global search in the topbar for students, staff, parents/guardians, classes, invoices, announcements, and news.
 - Fixed admin student action dropdown clipping by rendering the menu above table overflow.
@@ -565,6 +594,7 @@ The app is being prepared for schools with thousands of students:
 
 - Admin students list uses pagination.
 - Admin staff list uses pagination.
+- Admin parent/guardian list uses pagination and search, and student creation uses a limited searchable guardian selector.
 - Admin classes list uses search, level filtering, and pagination.
 - Admin announcements use server side pagination.
 - Admin news uses server side search, status filtering, and pagination.
@@ -572,7 +602,7 @@ The app is being prepared for schools with thousands of students:
 - Admin invoices use server side pagination, student/class search, and status filtering.
 - Admin assignments and timetable pages use search and pagination, with limited class dropdowns to avoid huge select menus.
 - The admin topbar global search returns a capped result set instead of loading every matching record.
-- Key models now include indexes for frequent dashboard queries.
+- Key models now include indexes for frequent dashboard queries, including students, staff, guardians, announcements, news, invoices, enrollments, assessments, attendance, assignments, and timetable records.
 - Attendance, assessments, enrollments, invoices, assignments, and timetable lookups are designed around class, term, student, subject, and teacher references.
 
 For 5,000–10,000+ students, keep using paginated admin views and avoid loading full student collections into client pages.

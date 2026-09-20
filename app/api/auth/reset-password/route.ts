@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import { hashPassword, hashResetToken } from "../../../../lib/auth";
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from "../../../../lib/rateLimit";
 import User from "../../../../models/User";
 import PasswordResetToken from "../../../../models/PasswordResetToken";
 
@@ -10,6 +15,12 @@ export async function POST(request: Request) {
       token?: string;
       password?: string;
     };
+    const limit = rateLimit({
+      key: `reset-password:${getClientIp(request)}:${token?.slice(0, 16) ?? "missing"}`,
+      limit: 6,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limit.limited) return rateLimitResponse(limit.resetAt);
     if (!token || !password || password.length < 8)
       return NextResponse.json(
         {

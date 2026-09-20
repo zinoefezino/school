@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../../lib/mongodb";
 import { getSession } from "../../../../../lib/session";
+import { writeAuditLog } from "../../../../../lib/audit";
 import Staff from "../../../../../models/Staff";
 import User from "../../../../../models/User";
 
@@ -29,6 +30,19 @@ export async function PATCH(
     );
   if (typeof body.isActive === "boolean")
     await User.findByIdAndUpdate(staff.user, { isActive: body.isActive });
+  await writeAuditLog({
+    session,
+    action:
+      typeof body.isActive === "boolean"
+        ? "admin.staff.accountStatus"
+        : "admin.staff.update",
+    targetType: "Staff",
+    targetId: staff._id.toString(),
+    metadata: {
+      isActive:
+        typeof body.isActive === "boolean" ? body.isActive : undefined,
+    },
+  });
   return NextResponse.json({ staff });
 }
 

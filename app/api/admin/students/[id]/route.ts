@@ -1,12 +1,13 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../../lib/mongodb";
 import { getSession } from "../../../../../lib/session";
+import { writeAuditLog } from "../../../../../lib/audit";
 import Student from "../../../../../models/Student";
 import User from "../../../../../models/User";
 
 async function admin() {
   const session = await getSession();
-  return session?.role === "ADMIN";
+  return session?.role === "ADMIN" ? session : null;
 }
 export async function GET(
   _request: Request,
@@ -30,7 +31,8 @@ export async function PATCH(
   request: Request,
   context: { params: Promise<{ id: string }> },
 ) {
-  if (!(await admin()))
+  const session = await admin();
+  if (!session)
     return NextResponse.json(
       { error: "Admin authentication is required." },
       { status: 401 },
@@ -52,5 +54,18 @@ export async function PATCH(
     return NextResponse.json({ error: "Student not found." }, { status: 404 });
   if (typeof body.isActive === "boolean")
     await User.findByIdAndUpdate(student.user, { isActive: body.isActive });
+  await writeAuditLog({
+    session,
+    action:
+      typeof body.isActive === "boolean"
+        ? "admin.student.accountStatus"
+        : "admin.student.update",
+    targetType: "Student",
+    targetId: student._id.toString(),
+    metadata: {
+      isActive:
+        typeof body.isActive === "boolean" ? body.isActive : undefined,
+    },
+  });
   return NextResponse.json({ student });
 }

@@ -19,7 +19,7 @@ function sessionLifetimeSeconds() {
     : defaultSessionLifetimeSeconds;
 }
 
-type SessionPayload = {
+export type SessionPayload = {
   userId: string;
   email: string;
   role: "ADMIN" | "STAFF" | "PARENT" | "STUDENT";

@@ -70,8 +70,13 @@ export default function FinanceOverviewPage() {
     collectionRate: 0,
   };
   const sessions = data?.sessions ?? [];
-  const maxBilled = Math.max(
-    ...sessions.map((item) => item.totalBilled),
+  const chartSessions = sessions.slice(0, 6);
+  const chartMax = Math.max(
+    ...chartSessions.flatMap((item) => [
+      item.totalBilled,
+      item.totalCollected,
+      item.outstanding,
+    ]),
     1,
   );
 
@@ -202,51 +207,77 @@ export default function FinanceOverviewPage() {
 
         <section className="rounded-2xl border border-navy/10 bg-white p-6">
           <h2 className="text-lg font-medium text-foreground">
-            Illustrative figures
+            Finance chart
           </h2>
           <p className="mt-1 text-sm text-foreground/60">
-            A quick visual comparison of billed, collected, and outstanding
-            fees by session.
+            Billed, collected, and outstanding fees by academic session.
           </p>
-          <div className="mt-6 flex flex-col gap-5">
-            {sessions.slice(0, 5).map((session) => (
-              <div key={session.sessionId}>
-                <div className="mb-2 flex items-center justify-between text-sm">
-                  <span className="font-medium text-foreground">
-                    {session.sessionName}
-                  </span>
-                  <span className="text-foreground/60">
-                    {formatNaira(session.totalBilled)}
-                  </span>
-                </div>
-                <div className="space-y-1.5">
-                  <div className="h-2 rounded-full bg-blue-light">
-                    <div
-                      className="h-full rounded-full bg-blue"
-                      style={{
-                        width: `${(session.totalBilled / maxBilled) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="h-2 rounded-full bg-[#3F7A5B]/10">
-                    <div
-                      className="h-full rounded-full bg-[#3F7A5B]"
-                      style={{
-                        width: `${(session.totalCollected / maxBilled) * 100}%`,
-                      }}
-                    />
-                  </div>
-                  <div className="h-2 rounded-full bg-[#B4483B]/10">
-                    <div
-                      className="h-full rounded-full bg-[#B4483B]"
-                      style={{
-                        width: `${(session.outstanding / maxBilled) * 100}%`,
-                      }}
-                    />
-                  </div>
+          <div className="mt-5 flex flex-wrap gap-3 text-xs text-foreground/60">
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-blue" />
+              Billed
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#3F7A5B]" />
+              Collected
+            </span>
+            <span className="inline-flex items-center gap-1.5">
+              <span className="h-2.5 w-2.5 rounded-full bg-[#B4483B]" />
+              Outstanding
+            </span>
+          </div>
+          <div className="mt-6">
+            {chartSessions.length > 0 && (
+              <div className="overflow-x-auto pb-2">
+                <div className="flex min-w-[420px] items-end gap-4 border-b border-l border-navy/10 px-3 pt-4">
+                  {chartSessions.map((session) => {
+                    const bars = [
+                      {
+                        label: "Billed",
+                        value: session.totalBilled,
+                        color: "bg-blue",
+                      },
+                      {
+                        label: "Collected",
+                        value: session.totalCollected,
+                        color: "bg-[#3F7A5B]",
+                      },
+                      {
+                        label: "Outstanding",
+                        value: session.outstanding,
+                        color: "bg-[#B4483B]",
+                      },
+                    ];
+
+                    return (
+                      <div
+                        key={session.sessionId}
+                        className="flex min-w-20 flex-1 flex-col items-center"
+                      >
+                        <div className="flex h-48 items-end gap-1.5">
+                          {bars.map((bar) => (
+                            <div
+                              key={bar.label}
+                              title={`${bar.label}: ${formatNaira(bar.value)}`}
+                              className={`w-3 rounded-t-full ${bar.color}`}
+                              style={{
+                                height: `${Math.max((bar.value / chartMax) * 100, bar.value > 0 ? 4 : 0)}%`,
+                              }}
+                            />
+                          ))}
+                        </div>
+                        <p className="mt-3 max-w-24 truncate text-center text-xs font-medium text-foreground/70">
+                          {session.sessionName}
+                        </p>
+                        <p className="mt-1 text-[10px] text-foreground/45">
+                          {session.collectionRate}% collected
+                        </p>
+                      </div>
+                    );
+                  })}
                 </div>
               </div>
-            ))}
+            )}
             {sessions.length === 0 && (
               <p className="rounded-xl bg-blue-light/50 p-4 text-sm text-foreground/60">
                 Charts will appear after invoices are generated.

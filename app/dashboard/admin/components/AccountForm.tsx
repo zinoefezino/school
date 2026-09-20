@@ -13,16 +13,22 @@ export default function AccountForm({ role }: { role: AccountRole }) {
   const [guardians, setGuardians] = useState<
     { _id: string; fullName: string; user?: { email?: string } }[]
   >([]);
+  const [guardianSearch, setGuardianSearch] = useState("");
 
   useEffect(() => {
     if (role !== "STUDENT") return;
-    fetch("/api/admin/guardians")
-      .then(async (response) => (response.ok ? response.json() : null))
-      .then((data) => {
-        if (data) setGuardians(data.guardians);
-      })
-      .catch(() => undefined);
-  }, [role]);
+    const timer = window.setTimeout(() => {
+      fetch(
+        `/api/admin/guardians?search=${encodeURIComponent(guardianSearch)}&limit=15`,
+      )
+        .then(async (response) => (response.ok ? response.json() : null))
+        .then((data) => {
+          if (data) setGuardians(data.guardians ?? []);
+        })
+        .catch(() => undefined);
+    }, 250);
+    return () => window.clearTimeout(timer);
+  }, [guardianSearch, role]);
 
   async function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -52,7 +58,7 @@ export default function AccountForm({ role }: { role: AccountRole }) {
               ? "/dashboard/admin/students"
               : role === "STAFF"
                 ? "/dashboard/admin/staff"
-                : "/dashboard/admin",
+                : "/dashboard/admin/parents",
           ),
         1200,
       );
@@ -162,6 +168,15 @@ export default function AccountForm({ role }: { role: AccountRole }) {
                 <option value="female">Female</option>
                 <option value="male">Male</option>
               </select>
+            </label>
+            <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
+              Find guardian
+              <input
+                value={guardianSearch}
+                onChange={(event) => setGuardianSearch(event.target.value)}
+                placeholder="Search parent name or phone"
+                className="rounded-xl border border-black/10 px-4 py-3 font-normal outline-none focus:border-blue text-base"
+              />
             </label>
             <label className="flex flex-col gap-2 text-sm font-medium text-foreground">
               Guardian

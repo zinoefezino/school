@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../../lib/mongodb";
 import { getSession } from "../../../../../lib/session";
+import { writeAuditLog } from "../../../../../lib/audit";
 import Invoice from "../../../../../models/Invoice";
 import Payment from "../../../../../models/Payment";
 
@@ -94,6 +95,19 @@ export async function POST(request: Request) {
     invoice.status = "PAID";
     await invoice.save();
   }
+
+  await writeAuditLog({
+    session,
+    action: "admin.payment.manualRecord",
+    targetType: "Payment",
+    targetId: payment._id.toString(),
+    metadata: {
+      invoiceId: invoice._id.toString(),
+      amount,
+      method,
+      reference,
+    },
+  });
 
   return NextResponse.json({ payment }, { status: 201 });
 }

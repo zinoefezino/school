@@ -63,6 +63,13 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
   const [collapsed, setCollapsed] = useState(false);
 
   useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
     fetch("/api/announcements/unread")
       .then(async (response) =>
         response.ok ? response.json() : { announcements: 0 },
@@ -111,11 +118,11 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-40 bg-navy/20 transition-opacity lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        className={`fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm transition-opacity duration-300 ease-out lg:hidden ${open ? "opacity-100" : "pointer-events-none opacity-0"}`}
         onClick={onClose}
       />
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-[width,transform] duration-300 lg:static lg:translate-x-0 ${open ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-20" : "lg:w-64"}`}
+        className={`fixed left-0 top-0 z-50 flex h-dvh w-[82vw] max-w-sm transform-gpu flex-col bg-navy shadow-2xl shadow-slate-950/20 transition-transform duration-300 ease-out lg:static lg:transition-[width,transform] lg:h-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${open ? "translate-x-0" : "-translate-x-full"} ${collapsed ? "lg:w-20" : "lg:w-64"}`}
       >
         <div className="flex items-center justify-between px-6 py-5 lg:px-4">
           <Link
@@ -225,3 +232,4 @@ export default function StaffSidebar({ open, onClose }: SidebarProps) {
     </>
   );
 }
+

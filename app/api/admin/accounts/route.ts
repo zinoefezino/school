@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import { hashPassword } from "../../../../lib/auth";
 import { getSession } from "../../../../lib/session";
+import { writeAuditLog } from "../../../../lib/audit";
 import User, { type UserRole } from "../../../../models/User";
 import Staff from "../../../../models/Staff";
 import Guardian from "../../../../models/Guardian";
@@ -97,6 +98,14 @@ export async function POST(request: Request) {
       await User.deleteOne({ _id: user._id });
       throw profileError;
     }
+
+    await writeAuditLog({
+      session,
+      action: "admin.account.create",
+      targetType: role,
+      targetId: profileId,
+      metadata: { userId: user._id.toString(), email: user.email },
+    });
 
     return NextResponse.json(
       { id: user._id.toString(), profileId, role, mustChangePassword: true },

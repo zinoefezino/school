@@ -6,6 +6,11 @@ import {
   sessionCookieOptions,
   verifyPassword,
 } from "../../../../lib/auth";
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from "../../../../lib/rateLimit";
 import User, { type UserRole } from "../../../../models/User";
 import Student from "../../../../models/Student";
 
@@ -18,6 +23,13 @@ export async function POST(request: Request) {
       password?: string;
       role?: UserRole;
     };
+    const normalizedIdentifier = identifier?.toLowerCase().trim() ?? "missing";
+    const limit = rateLimit({
+      key: `login:${getClientIp(request)}:${role ?? "unknown"}:${normalizedIdentifier}`,
+      limit: 8,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limit.limited) return rateLimitResponse(limit.resetAt);
     if (!identifier || !password || !role || !roles.includes(role))
       return NextResponse.json(
         { error: "Identifier, password, and portal role are required." },
@@ -25,7 +37,7 @@ export async function POST(request: Request) {
       );
     await connectDB();
     let user = await User.findOne({
-      email: identifier.toLowerCase().trim(),
+      email: normalizedIdentifier,
       role,
       isActive: true,
     });

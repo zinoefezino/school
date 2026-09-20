@@ -176,6 +176,13 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   });
 
   useEffect(() => {
+    document.body.style.overflow = open ? "hidden" : "";
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [open]);
+
+  useEffect(() => {
     const match = groupForPath(pathname);
     if (match) Promise.resolve().then(() => setOpenGroup(match));
   }, [pathname]);
@@ -261,14 +268,14 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
   return (
     <>
       <div
-        className={`fixed inset-0 z-40 bg-navy/20 transition-opacity duration-300 ease-out lg:hidden ${
+        className={`fixed inset-0 z-40 bg-slate-950/30 backdrop-blur-sm transition-opacity duration-300 ease-out lg:hidden ${
           open ? "opacity-100" : "pointer-events-none opacity-0"
         }`}
         onClick={onClose}
       />
 
       <aside
-        className={`fixed inset-y-0 left-0 z-50 flex w-64 transform-gpu flex-col bg-navy transition-[width,transform] duration-300 ease-out lg:static lg:translate-x-0 ${
+        className={`fixed left-0 top-0 z-50 flex h-dvh w-[82vw] max-w-sm transform-gpu flex-col bg-navy shadow-2xl shadow-slate-950/20 transition-transform duration-300 ease-out lg:static lg:transition-[width,transform] lg:h-auto lg:max-w-none lg:translate-x-0 lg:shadow-none ${
           open ? "translate-x-0" : "-translate-x-full"
         } ${collapsed ? "lg:w-20" : "lg:w-64"}`}
       >
@@ -381,3 +388,4 @@ export default function Sidebar({ open, onClose }: SidebarProps) {
     </>
   );
 }
+

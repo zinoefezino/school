@@ -37,5 +37,7 @@ const newsPostSchema = new Schema<INewsPost>(
 
 newsPostSchema.index({ status: 1, publishedAt: -1 });
 newsPostSchema.index({ slug: 1 }, { unique: true });
+newsPostSchema.index({ title: 1 });
+newsPostSchema.index({ category: 1 });
 
 export default models.NewsPost || model<INewsPost>("NewsPost", newsPostSchema);

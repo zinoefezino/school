@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 import { connectDB } from "../../../../../lib/mongodb";
 import { getSession } from "../../../../../lib/session";
+import { writeAuditLog } from "../../../../../lib/audit";
 import ClassSection from "../../../../../models/ClassSection";
 import Enrollment from "../../../../../models/Enrollment";
 import Staff from "../../../../../models/Staff";
@@ -30,6 +31,12 @@ export async function PATCH(
         { status: 409 },
       );
     await ClassSection.findByIdAndDelete(id);
+    await writeAuditLog({
+      session,
+      action: "admin.class.delete",
+      targetType: "ClassSection",
+      targetId: id,
+    });
     return NextResponse.json({ message: "Class deleted." });
   }
   try {
@@ -63,6 +70,13 @@ export async function PATCH(
     });
     if (!classSection)
       return NextResponse.json({ error: "Class not found." }, { status: 404 });
+    await writeAuditLog({
+      session,
+      action: "admin.class.update",
+      targetType: "ClassSection",
+      targetId: classSection._id.toString(),
+      metadata: { name, classTeacher: classTeacher || null },
+    });
     return NextResponse.json({ class: classSection });
   } catch {
     return NextResponse.json(

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
+import { writeAuditLog } from "../../../../lib/audit";
 import NewsPost from "../../../../models/NewsPost";
 
 export async function GET(
@@ -30,6 +31,7 @@ export async function DELETE(
   const { slug } = await params;
   await connectDB();
   const post = await NewsPost.findOneAndDelete({ slug }).lean<{
+    _id?: { toString(): string };
     status?: string;
   }>();
   const result = { deletedCount: post ? 1 : 0 };
@@ -41,6 +43,14 @@ export async function DELETE(
     revalidatePath("/news");
     revalidatePath(`/news/${slug}`);
   }
+
+  await writeAuditLog({
+    session,
+    action: "admin.news.delete",
+    targetType: "NewsPost",
+    targetId: post?._id?.toString(),
+    metadata: { slug, status: post?.status },
+  });
 
   return NextResponse.json({ deleted: true });
 }

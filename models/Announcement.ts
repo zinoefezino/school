@@ -22,5 +22,8 @@ const announcementSchema = new Schema<IAnnouncement>({
   publishedBy: { type: String, required: true },
 });
 
+announcementSchema.index({ audiences: 1, publishedAt: -1 });
+announcementSchema.index({ title: 1 });
+
 export default models.Announcement ||
   model<IAnnouncement>("Announcement", announcementSchema);

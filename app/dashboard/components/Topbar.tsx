@@ -9,6 +9,7 @@ const titles: Record<string, string> = {
   "/dashboard/admin": "Overview",
   "/dashboard/admin/students": "Students",
   "/dashboard/admin/staff": "Staff",
+  "/dashboard/admin/parents": "Parents",
   "/dashboard/admin/parents/new": "Add parent",
   "/dashboard/admin/classes": "Classes",
   "/dashboard/admin/academics": "Academics",
@@ -120,7 +121,7 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
   }
 
   return (
-    <header className="flex items-center justify-between border-b border-black/5 bg-white px-6 py-4">
+    <header className="flex flex-wrap items-center justify-between gap-3 border-b border-black/5 bg-white px-4 py-4 sm:px-6">
       <div className="flex items-center gap-4">
         <button
           onClick={onMenuClick}
@@ -132,8 +133,11 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
         <h1 className="text-lg font-medium text-foreground">{title}</h1>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div ref={searchRef} className="relative hidden sm:block">
+      <div className="contents sm:flex sm:items-center sm:gap-4">
+        <div
+          ref={searchRef}
+          className="relative order-3 w-full sm:order-none sm:w-auto"
+        >
           <form
             onSubmit={submitSearch}
             className="flex items-center gap-2 rounded-full border border-black/10 px-3.5 py-2"
@@ -156,14 +160,14 @@ export default function Topbar({ onMenuClick }: TopbarProps) {
                 setSearchOpen(true);
               }}
               onFocus={() => setSearchOpen(true)}
-              placeholder="Search records..."
-              className="w-44 text-sm text-foreground outline-none placeholder:text-foreground/40"
+              placeholder="Search"
+              className="w-full text-sm text-foreground outline-none placeholder:text-foreground/40 sm:w-40 lg:w-48"
             />
           </form>
           {searchOpen && query.trim().length >= 2 && (
-            <div className="absolute right-0 top-12 z-50 w-[min(420px,calc(100vw-2rem))] overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-xl">
-              <div className="border-b border-black/5 px-4 py-3 text-xs font-medium uppercase tracking-wide text-foreground/45">
-                Global search
+            <div className="absolute left-0 right-0 top-12 z-50 overflow-hidden rounded-2xl border border-navy/10 bg-white shadow-xl sm:left-auto sm:w-[min(420px,calc(100vw-2rem))]">
+              <div className="border-b border-black/5 px-4 py-2.5 text-xs font-medium uppercase tracking-wide text-foreground/45">
+                Results
               </div>
               {searching ? (
                 <p className="px-4 py-5 text-sm text-foreground/60">

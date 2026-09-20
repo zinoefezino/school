@@ -84,7 +84,11 @@ export default function AdminOverview() {
               <HugeiconsIcon icon={stat.icon} size={20} />
             </span>
             <p className="mt-4 text-2xl font-medium text-foreground">
-              {loading ? "..." : values[stat.key]}
+              {loading ? (
+                <span className="block h-8 w-20 animate-pulse rounded-lg bg-blue-light" />
+              ) : (
+                values[stat.key]
+              )}
             </p>
             <p className="mt-1 text-sm text-foreground/60">{stat.label}</p>
           </div>

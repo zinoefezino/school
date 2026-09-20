@@ -17,4 +17,7 @@ const guardianSchema = new Schema<IGuardian>({
   phone: String,
 });
 
+guardianSchema.index({ fullName: 1 });
+guardianSchema.index({ phone: 1 });
+
 export default models.Guardian || model<IGuardian>("Guardian", guardianSchema);

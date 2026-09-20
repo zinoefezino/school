@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
+import { writeAuditLog } from "../../../../lib/audit";
 import ClassFee from "../../../../models/ClassFee";
 import Enrollment from "../../../../models/Enrollment";
 import Invoice from "../../../../models/Invoice";
@@ -166,6 +167,22 @@ export async function POST(request: Request) {
         generated += 1;
       }
     }
+
+    await writeAuditLog({
+      session,
+      action: parseBoolean(body.publish)
+        ? "admin.feeSchedule.publish"
+        : "admin.feeSchedule.save",
+      targetType: "ClassFee",
+      targetId: schedule._id.toString(),
+      metadata: {
+        classSectionId: body.classSectionId,
+        termId: body.termId,
+        amount: body.amount,
+        generated,
+        updated,
+      },
+    });
 
     return NextResponse.json(
       { schedule: schedule.toObject(), generated, updated },

@@ -9,11 +9,11 @@ export default function NewParentPage() {
   return (
     <div className="max-w-3xl">
       <a
-        href="/dashboard/admin"
+        href="/dashboard/admin/parents"
         className="flex items-center gap-1.5 text-sm font-medium text-blue"
       >
         <HugeiconsIcon icon={ArrowLeft02Icon} size={16} />
-        Back to overview
+        Back to parents
       </a>
       <div className="mt-5">
         <div className="flex items-center gap-3">

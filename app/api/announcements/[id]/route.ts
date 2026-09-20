@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
+import { writeAuditLog } from "../../../../lib/audit";
 import Announcement from "../../../../models/Announcement";
 import AnnouncementRead from "../../../../models/AnnouncementRead";
 
@@ -37,6 +38,12 @@ export async function DELETE(
     );
 
   await AnnouncementRead.deleteMany({ announcement: id });
+  await writeAuditLog({
+    session,
+    action: "admin.announcement.delete",
+    targetType: "Announcement",
+    targetId: id,
+  });
 
   return NextResponse.json({ deleted: true });
 }

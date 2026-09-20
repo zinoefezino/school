@@ -1,6 +1,11 @@
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from "../../../../lib/rateLimit";
 import Announcement from "../../../../models/Announcement";
 import ClassSection from "../../../../models/ClassSection";
 import Guardian from "../../../../models/Guardian";
@@ -40,7 +45,13 @@ export async function GET(request: Request) {
     );
 
   const params = new URL(request.url).searchParams;
-  const query = params.get("q")?.trim() ?? "";
+  const limit = rateLimit({
+    key: `admin-search:${session.userId}:${getClientIp(request)}`,
+    limit: 120,
+    windowMs: 60 * 1000,
+  });
+  if (limit.limited) return rateLimitResponse(limit.resetAt);
+  const query = (params.get("q")?.trim() ?? "").slice(0, 80);
   if (query.length < 2) return NextResponse.json({ results: [] });
 
   const regex = new RegExp(escapeRegex(query), "i");
@@ -176,5 +187,8 @@ export async function GET(request: Request) {
     })),
   ].slice(0, 12);
 
-  return NextResponse.json({ results });
+  return NextResponse.json(
+    { results },
+    { headers: { "Cache-Control": "no-store" } },
+  );
 }

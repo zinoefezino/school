@@ -2,6 +2,11 @@ import { randomBytes } from "crypto";
 import { NextResponse } from "next/server";
 import { connectDB } from "../../../../lib/mongodb";
 import { hashResetToken, resetTokenLifetimeMs } from "../../../../lib/auth";
+import {
+  getClientIp,
+  rateLimit,
+  rateLimitResponse,
+} from "../../../../lib/rateLimit";
 import User from "../../../../models/User";
 import PasswordResetToken from "../../../../models/PasswordResetToken";
 
@@ -10,6 +15,12 @@ export async function POST(request: Request) {
     "If an account matches that email, a password reset link will be sent.";
   try {
     const { email } = (await request.json()) as { email?: string };
+    const limit = rateLimit({
+      key: `forgot-password:${getClientIp(request)}:${email?.toLowerCase().trim() ?? "missing"}`,
+      limit: 5,
+      windowMs: 15 * 60 * 1000,
+    });
+    if (limit.limited) return rateLimitResponse(limit.resetAt);
     if (!email) return NextResponse.json({ message: genericMessage });
     await connectDB();
     const user = await User.findOne({

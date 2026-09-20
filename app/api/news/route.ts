@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { revalidatePath } from "next/cache";
 import { connectDB } from "../../../lib/mongodb";
 import { getSession } from "../../../lib/session";
+import { writeAuditLog } from "../../../lib/audit";
 import NewsPost, { type NewsStatus } from "../../../models/NewsPost";
 
 function slugify(value: string) {
@@ -121,6 +122,14 @@ export async function POST(request: Request) {
     revalidatePath("/news");
     revalidatePath(`/news/${post.slug}`);
   }
+
+  await writeAuditLog({
+    session,
+    action: status === "PUBLISHED" ? "admin.news.publish" : "admin.news.draft",
+    targetType: "NewsPost",
+    targetId: post._id.toString(),
+    metadata: { slug: post.slug, title: post.title, status },
+  });
 
   return NextResponse.json({ post }, { status: 201 });
 }
