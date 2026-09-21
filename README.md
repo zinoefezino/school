@@ -130,7 +130,20 @@ The app separates class heads from subject teachers:
 - Staff can only create assignments, timetable entries, and results for class+subject combinations assigned to them.
 - Attendance remains a class-head responsibility.
 
-Admin can manage subject-teacher assignments from Dashboard → Admin → Academics.
+Admin can manage subject-teacher assignments from Dashboard → Admin → Academics → Subject teachers.
+
+### Academic responsibilities at a glance
+
+| Area | Who sets it up | Who manages it day to day | Where |
+| --- | --- | --- | --- |
+| Class teacher | Admin | Admin changes it when needed | Dashboard → Admin → Academics → Classes |
+| Subject teacher | Admin | Admin changes class/subject/teacher mappings | Dashboard → Admin → Academics → Subject teachers |
+| Attendance | Class teacher | Class teacher records attendance for their class | Staff dashboard → Attendance |
+| Assignments | Admin can publish, assigned subject teachers can publish for their own subject/class | Assigned subject teacher | Admin → Academics → Assignments or Staff dashboard → Assignments |
+| Timetable | Admin can create the timetable, assigned subject teachers can manage entries for their own subject/class | Usually admin/academic officer sets the official timetable | Admin → Academics → Timetable or Staff dashboard → Timetable |
+| Results | Assigned subject teacher enters subject scores | Class teacher can review/compile class-level result flow, admin releases/publishes | Staff dashboard → Results, then admin/result release flow |
+
+The important rule is that class teacher and subject teacher are not the same thing. A class teacher is the head of a class. A subject teacher teaches a particular subject in a particular class.
 
 ## How the school flow works
 
@@ -265,6 +278,8 @@ Admin manages this from:
 ```txt
 Dashboard → Admin → Academics → Subject teachers
 ```
+
+The Subject teachers page is its own Academics tab because schools can easily have 100+ class and subject teacher mappings. It includes search, row limits, and pagination so admins do not have to scroll through every assignment at once.
 
 ### 7. Staff dashboard rules
 
@@ -579,7 +594,8 @@ Later, when file storage is configured, parent-submitted manual payment proof ca
 - Added student profile data wiring, including name, age/date of birth, gender, and professional male/female/default student icons.
 - Added database-backed student assignments and timetable pages.
 - Added staff assignment and timetable creation flows.
-- Added admin academic setup pages for sessions, terms, subjects, subject teachers, assignments, and timetable.
+- Added admin academic setup pages for sessions, terms, subjects, assignments, and timetable.
+- Added a dedicated searchable and paginated admin Subject teachers page for class/subject/teacher mappings.
 - Added admin student pagination and database indexes for larger school sizes.
 - Added admin parent list with search, pagination, linked-child counts, and active/inactive status.
 - Added searchable guardian selector when creating students.
@@ -596,6 +612,7 @@ The app is being prepared for schools with thousands of students:
 - Admin staff list uses pagination.
 - Admin parent/guardian list uses pagination and search, and student creation uses a limited searchable guardian selector.
 - Admin classes list uses search, level filtering, and pagination.
+- Admin subject teachers list uses search and pagination.
 - Admin announcements use server side pagination.
 - Admin news uses server side search, status filtering, and pagination.
 - Admin fee schedules use search, filters, and pagination.

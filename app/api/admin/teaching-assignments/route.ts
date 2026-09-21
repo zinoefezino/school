@@ -2,6 +2,10 @@ import { NextResponse } from "next/server";
 import { Types } from "mongoose";
 import { connectDB } from "../../../../lib/mongodb";
 import { getSession } from "../../../../lib/session";
+import ClassLevel from "../../../../models/ClassLevel";
+import ClassSection from "../../../../models/ClassSection";
+import Staff from "../../../../models/Staff";
+import Subject from "../../../../models/Subject";
 import TeachingAssignment from "../../../../models/TeachingAssignment";
 
 async function requireAdmin() {
@@ -9,7 +13,11 @@ async function requireAdmin() {
   return session?.role === "ADMIN" ? session : null;
 }
 
-export async function GET() {
+function escapeRegex(value: string) {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+export async function GET(request: Request) {
   const session = await requireAdmin();
   if (!session)
     return NextResponse.json(
@@ -17,8 +25,51 @@ export async function GET() {
       { status: 401 },
     );
 
+  const { searchParams } = new URL(request.url);
+  const search = searchParams.get("search")?.trim() ?? "";
+  const requestedPage = Number(searchParams.get("page") ?? "1");
+  const requestedLimit = Number(searchParams.get("limit") ?? "25");
+  const page =
+    Number.isFinite(requestedPage) && requestedPage > 0
+      ? Math.floor(requestedPage)
+      : 1;
+  const limit =
+    Number.isFinite(requestedLimit) && requestedLimit > 0
+      ? Math.min(Math.floor(requestedLimit), 100)
+      : 25;
+
   await connectDB();
-  const teachingAssignments = await TeachingAssignment.find()
+  let query = {};
+
+  if (search) {
+    const regex = new RegExp(escapeRegex(search), "i");
+    const [subjects, teachers, classLevels] = await Promise.all([
+      Subject.find({ $or: [{ name: regex }, { code: regex }] })
+        .select("_id")
+        .lean(),
+      Staff.find({ fullName: regex }).select("_id").lean(),
+      ClassLevel.find({ name: regex }).select("_id").lean(),
+    ]);
+    const classSections = await ClassSection.find({
+      $or: [
+        { name: regex },
+        { classLevel: { $in: classLevels.map((item) => item._id) } },
+      ],
+    })
+      .select("_id")
+      .lean();
+
+    query = {
+      $or: [
+        { subject: { $in: subjects.map((item) => item._id) } },
+        { teacher: { $in: teachers.map((item) => item._id) } },
+        { classSection: { $in: classSections.map((item) => item._id) } },
+      ],
+    };
+  }
+
+  const [teachingAssignments, total] = await Promise.all([
+    TeachingAssignment.find(query)
     .populate("subject", "name code")
     .populate("teacher", "fullName")
     .populate({
@@ -30,9 +81,19 @@ export async function GET() {
       ],
     })
     .sort({ updatedAt: -1 })
-    .lean();
+      .skip((page - 1) * limit)
+      .limit(limit)
+      .lean(),
+    TeachingAssignment.countDocuments(query),
+  ]);
 
-  return NextResponse.json({ teachingAssignments });
+  return NextResponse.json({
+    teachingAssignments,
+    total,
+    page,
+    limit,
+    pages: Math.max(Math.ceil(total / limit), 1),
+  });
 }
 
 export async function POST(request: Request) {

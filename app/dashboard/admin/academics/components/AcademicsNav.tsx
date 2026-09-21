@@ -7,6 +7,7 @@ import {
   Book02Icon,
   Calendar03Icon,
   StudentsIcon,
+  TeacherIcon,
 } from "@hugeicons/core-free-icons";
 
 const items = [
@@ -19,6 +20,11 @@ const items = [
     label: "Classes",
     href: "/dashboard/admin/academics/classes",
     icon: StudentsIcon,
+  },
+  {
+    label: "Subject teachers",
+    href: "/dashboard/admin/academics/subject-teachers",
+    icon: TeacherIcon,
   },
   {
     label: "Assignments",
